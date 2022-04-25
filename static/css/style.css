@@ -1,4 +1,94 @@
+html {
+    font-size: 100%;
+}
+
 body {
     background-color: rgb(31, 31, 31);
     color: white;
+    margin: 0;
+    font-family: "IBM Plex Sans", sans-serif;
+}
+
+:root {
+    --horiz-padding: 5%;
+}
+
+/* header, nav */
+
+.header {
+    display: flex;
+    align-items: center;
+
+    padding: 0.5em var(--horiz-padding);
+    padding-right: 0;
+}
+
+.header__logo {
+    text-decoration: none;
+    color: white;
+    white-space: nowrap;
+}
+
+.header__logo-icon {
+    display: inline-block;
+
+    background: url("/images/logo_dark.svg");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center center;
+
+    width: 2.5em;
+    height: 2.5em;
+
+    vertical-align: middle;
+}
+
+.header__logo-text {
+    padding: 0 0.5em;
+    vertical-align: middle;
+    font-size: 1.2rem;
+}
+
+.header__spacer {
+    flex-grow: 1;
+}
+
+.nav {
+    display: inline-block;
+    background-color: rgb(1, 35, 114);
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+
+    white-space: nowrap;
+    overflow: hidden;
+
+    padding-right: var(--horiz-padding);
+}
+
+.nav__link {
+    height: 100%;
+    display: inline-block;
+    padding: 0.25em 1.2em;
+    text-decoration: none;
+    color: white;
+
+    font-size: 1.1rem;
+}
+
+.nav__link:hover {
+    background-color: rgb(0, 20, 66);
+}
+
+/* content */
+
+.content {
+    margin: 0 auto;
+    max-width: 60ch;
+}
+
+@media screen and (max-width: 600px) {
+    .content {
+        width: 100%;
+        padding: 0 2em;
+    }
 }

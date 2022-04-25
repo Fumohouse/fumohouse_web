@@ -1,0 +1,16 @@
+<header class="header">
+    <a class="header__logo" href="/">
+        <span class="header__logo-icon"></span>
+        <span class="header__logo-text">Fumohouse</span>
+    </a>
+
+    <div class="header__spacer"></div>
+
+    <nav class="nav">
+        <a class="nav__link" href="#">Home</a>
+        <a class="nav__link" href="#">Changelog</a>
+        <a class="nav__link" href="#">Download</a>
+        <a class="nav__link" href="#">About</a>
+        <a class="nav__link" href="#">Login</a>
+    </nav>
+</header>
