@@ -20,7 +20,7 @@ body {
     font-family: "IBM Plex Sans", sans-serif;
 
     background-image: url("/images/faces.svg");
-    background-size: 8rem 8rem;
+    background-size: 16rem auto;
     background-position: center center;
 }
 
