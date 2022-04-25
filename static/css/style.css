@@ -1,19 +1,42 @@
 html {
     font-size: 100%;
-}
-
-body {
-    background-color: rgb(31, 31, 31);
-    color: white;
-    margin: 0;
-    font-family: "IBM Plex Sans", sans-serif;
+    height: 100%;
 }
 
 :root {
+    --main-bg: rgb(31, 31, 31);
+    --border-radius: 8px;
     --horiz-padding: 5%;
 }
 
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+
+    background-color: var(--main-bg);
+    color: white;
+    margin: 0;
+    font-family: "IBM Plex Sans", sans-serif;
+
+    background-image: url("/images/faces.svg");
+    background-size: 8rem 8rem;
+    background-position: center center;
+}
+
 /* header, nav */
+
+.header::before {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+
+    z-index: -1000;
+    height: 15%;
+    content: "";
+    background: linear-gradient(to bottom, rgb(20, 20, 20) 0%, rgb(20, 20, 20) 20%, transparent 100%);
+}
 
 .header {
     display: flex;
@@ -56,8 +79,8 @@ body {
 .nav {
     display: inline-block;
     background-color: rgb(1, 35, 114);
-    border-top-left-radius: 8px;
-    border-bottom-left-radius: 8px;
+    border-top-left-radius: var(--border-radius);
+    border-bottom-left-radius: var(--border-radius);
 
     white-space: nowrap;
     overflow: hidden;
@@ -82,13 +105,23 @@ body {
 /* content */
 
 .content {
+    flex-grow: 1;
+
+    border-radius: var(--border-radius);
     margin: 0 auto;
-    max-width: 60ch;
+    margin-top: 3em;
+    padding: 0 1em;
+
+    min-width: 65ch;
+    max-width: 65ch;
+
+    background-color: rgb(25, 25, 25);
 }
 
-@media screen and (max-width: 600px) {
+/* approximate width including margin */
+@media screen and (max-width: 85ch) {
     .content {
-        width: 100%;
-        padding: 0 2em;
+        min-width: 0;
+        margin: 0 2em;
     }
 }
