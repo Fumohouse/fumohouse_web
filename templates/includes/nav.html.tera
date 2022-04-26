@@ -6,6 +6,11 @@
 
     <div class="header__spacer"></div>
 
+    <input type="checkbox" id="nav__expand">
+    <label for="nav__expand" id="nav__expand-icon">
+        <i class="fa-solid fa-chevron-down"></i>
+    </label>
+
     <nav class="nav">
         <a class="nav__link" href="#">Home</a>
         <a class="nav__link" href="#">Changelog</a>
