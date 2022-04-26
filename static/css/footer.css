@@ -1,0 +1,65 @@
+.footer {
+    background-color: var(--nav-bg);
+    border-top: 0.15rem solid white;
+
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1em;
+
+    padding: 1em var(--horiz-padding);
+}
+
+.footer__column {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 25ch;
+}
+
+.footer__title {
+    font-weight: bold;
+}
+
+.footer__link {
+    text-decoration: none;
+}
+
+/* the special column */
+
+.footer__socials {
+    display: flex;
+    flex-direction: row;
+    gap: 1em;
+}
+
+.footer__social {
+    display: inline-block;
+    font-size: 1.5em;
+}
+
+.footer__description {
+    display: block;
+    margin: 0.125em 0;
+}
+
+.footer__heart {
+    color: rgb(220, 93, 226);
+}
+
+.footer__license {
+    border-top: 2px solid white;
+    margin-top: 0.5em;
+    padding-top: 0.5em;
+}
+
+.footer__license-icons {
+    font-size: 1.25em;
+    text-decoration: none;
+}
+
+.footer__license-description {
+    font-size: 0.75em;
+    color: rgb(200, 200, 200);
+}

@@ -1,4 +1,5 @@
 @import url("/css/nav.css");
+@import url("/css/footer.css");
 
 html {
     font-size: 100%;
@@ -7,9 +8,17 @@ html {
 
 :root {
     --main-bg: rgb(31, 31, 31);
-    --nav-bg: rgb(1, 35, 114);
+    --nav-bg: rgb(0, 39, 78);
     --border-radius: 8px;
     --horiz-padding: 5%;
+}
+
+a {
+    color: white;
+}
+
+a:hover {
+    color: rgb(220, 220, 220);
 }
 
 body {
@@ -25,6 +34,33 @@ body {
     background-image: url("/images/faces.svg");
     background-size: 16rem auto;
     background-position: center center;
+}
+
+/* logo */
+
+.logo {
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.logo__icon {
+    display: inline-block;
+
+    background: url("/images/logo_dark.svg");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center center;
+
+    width: 2.5em;
+    height: 2.5em;
+
+    vertical-align: middle;
+}
+
+.logo__text {
+    padding: 0 0.5em;
+    vertical-align: middle;
+    font-size: 1.2rem;
 }
 
 /* content */

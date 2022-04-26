@@ -1,7 +1,7 @@
 <header class="header">
-    <a class="header__logo" href="/">
-        <span class="header__logo-icon"></span>
-        <span class="header__logo-text">Fumohouse</span>
+    <a class="logo" href="/">
+        <span class="logo__icon"></span>
+        <span class="logo__text">Fumohouse</span>
     </a>
 
     <div class="header__spacer"></div>

@@ -23,6 +23,7 @@
 <body>
     {% include "includes/nav" %}
     <div class="content">{% block content %}{% endblock content %}</div>
+    {% include "includes/footer" %}
 </body>
 
 </html>

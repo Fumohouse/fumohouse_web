@@ -1,0 +1,55 @@
+<footer class="footer">
+    <div class="footer__column">
+        <div class="footer__title">Column 1</div>
+        <a href="#" class="footer__link">Link 1</a>
+        <a href="#" class="footer__link">Link 2</a>
+        <a href="#" class="footer__link">Link 3</a>
+        <a href="#" class="footer__link">Link 4</a>
+        <a href="#" class="footer__link">Link 5</a>
+    </div>
+    <div class="footer__column">
+        <div class="footer__title">Column 2</div>
+        <a href="#" class="footer__link">Link 1</a>
+        <a href="#" class="footer__link">Link 2</a>
+        <a href="#" class="footer__link">Link 3</a>
+        <a href="#" class="footer__link">Link 4</a>
+        <a href="#" class="footer__link">Link 5</a>
+    </div>
+    <div class="footer__column">
+        <div class="footer__title">Column 3</div>
+        <a href="#" class="footer__link">Link 1</a>
+        <a href="#" class="footer__link">Link 2</a>
+        <a href="#" class="footer__link">Link 3</a>
+        <a href="#" class="footer__link">Link 4</a>
+        <a href="#" class="footer__link">Link 5</a>
+    </div>
+    <div class="footer__column">
+        <span class="logo__icon"></span>
+
+        <div class="footer__description"><strong>Fumohouse</strong> • voided_etc // 2022</div>
+        <div class="footer__description">Made with <i class="footer__heart fa-solid fa-heart"></i></div>
+
+        <div class="footer__socials">
+            <a href="https://github.com/Fumohouse" class="footer__social"><i class="fa-brands fa-github"></i></a>
+            <a href="https://discord.gg/X8Z3WzA6m6" class="footer__social"><i class="fa-brands fa-discord"></i></a>
+            <a href="mailto:fumohouse@pm.me" class="footer__social"><i class="fa-solid fa-at"></i></a>
+        </div>
+
+        <div class="footer__license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="footer__license-icons">
+                <i class="fa-brands fa-creative-commons"></i>
+                <i class="fa-brands fa-creative-commons-by"></i>
+                <i class="fa-brands fa-creative-commons-nc"></i>
+                <i class="fa-brands fa-creative-commons-sa"></i>
+            </a>
+
+            <div class="footer__license-description">
+                The content of this website and the game's own assets are licensed under the CC BY-NC-SA 4.0 license.
+                The license does not apply to third-party assets or content.
+                Inquire for details on ownership, licensing, or attribution.
+                <br>
+                Source code may be available under a different license.
+            </div>
+        </div>
+    </div>
+</footer>
