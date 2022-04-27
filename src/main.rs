@@ -1,23 +1,27 @@
 #[macro_use]
 extern crate rocket;
+#[macro_use]
+extern crate diesel;
+extern crate rand;
+extern crate serde;
 
 use rocket::figment::{
     util::map,
     value::{Map, Value},
 };
 use rocket::fs::FileServer;
-use rocket::serde::Serialize;
 use rocket_dyn_templates::Template;
+use rocket_sync_db_pools::database;
 use std::env;
 
-#[derive(Serialize)]
-#[serde(crate = "rocket::serde")]
-struct EmptyContext {}
+mod db;
+mod routes;
+mod util;
 
-#[get("/")]
-fn index() -> Template {
-    Template::render("index", &EmptyContext {})
-}
+pub use db::models;
+
+#[database("fumohouse_db")]
+struct FumohouseDb(diesel::PgConnection);
 
 #[launch]
 fn rocket() -> _ {
@@ -39,7 +43,10 @@ fn rocket() -> _ {
     let figment = rocket::Config::figment().merge(("databases", map!["fumohouse_db" => db]));
 
     rocket::custom(figment)
+        .attach(FumohouseDb::fairing())
         .attach(Template::fairing())
+        .manage(util::CaptchaVerifier::new())
         .mount("/", FileServer::from("static/"))
-        .mount("/", routes![index])
+        .mount("/", routes::pages::routes())
+        .mount("/auth", routes::auth::routes())
 }
