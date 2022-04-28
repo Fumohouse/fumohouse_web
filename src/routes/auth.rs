@@ -1,4 +1,4 @@
-use crate::util::{CaptchaVerifier, CsrfToken};
+use crate::util::{CaptchaVerifier, CsrfToken, CsrfVerify};
 use rocket::form::{Context, Contextual, Error, Form};
 use rocket::http::Status;
 use rocket::response::Redirect;
@@ -12,7 +12,6 @@ pub fn routes() -> Vec<Route> {
 
 #[derive(FromForm)]
 pub struct RegisterForm<'a> {
-    csrf: &'a str,
     #[field(validate = len(1..))]
     username: &'a str,
     #[field(validate = len(8..))]
@@ -43,41 +42,34 @@ fn register_get(csrf: CsrfToken, captcha: &State<CaptchaVerifier>) -> Template {
 
 #[post("/register", data = "<form>")]
 async fn register_post<'a>(
-    csrf: CsrfToken,
+    csrf: CsrfVerify,
     mut form: Form<Contextual<'a, RegisterForm<'a>>>,
     captcha: &State<CaptchaVerifier>,
 ) -> Result<(Status, Template), Redirect> {
-    if let Some(ref form_data) = form.value {
-        match csrf.token_cookie {
-            Some(token) => {
-                if &token != form_data.csrf {
-                    return Err(Redirect::to(uri!(register_get)));
-                }
+    if csrf.success() {
+        if let Some(ref form_data) = form.value {
+            let captcha_success = captcha
+                .verify(form_data.captcha_response)
+                .await
+                .unwrap_or_else(|err| {
+                    form.context.push_error(Error::validation(format!(
+                        "CAPTCHA verification failed: {}",
+                        err.to_string()
+                    )));
+
+                    false
+                });
+
+            if captcha_success {
+                // TODO: Account creation
+                println!("Hi!");
+
+                // TODO: Redirect to account page; log in
+                return Err(Redirect::to(uri!("/")));
+            } else {
+                form.context
+                    .push_error(Error::validation("Incorrect CAPTCHA response"));
             }
-            None => return Err(Redirect::to(uri!(register_get))),
-        }
-
-        let captcha_success = captcha
-            .verify(form_data.captcha_response)
-            .await
-            .unwrap_or_else(|err| {
-                form.context.push_error(Error::validation(format!(
-                    "CAPTCHA verification failed: {}",
-                    err.to_string()
-                )));
-
-                false
-            });
-
-        if captcha_success {
-            // TODO: Account creation
-            println!("Hi!");
-
-            // TODO: Redirect to account page; log in
-            return Err(Redirect::to(uri!("/")));
-        } else {
-            form.context
-                .push_error(Error::validation("Incorrect CAPTCHA response"));
         }
     }
 
@@ -86,7 +78,7 @@ async fn register_post<'a>(
         Template::render(
             "register",
             RegisterContext {
-                csrf_token: &csrf.token,
+                csrf_token: csrf.new_token(),
                 site_key: &captcha.site_key,
                 form_context: &form.context,
             },

@@ -5,9 +5,8 @@
 {% block content %}
 <h2>Register an account</h2>
 <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
-<form action="/auth/register" method="post" enctype="multipart/form-data">
+<form action="/auth/register?csrf_token={{ csrf_token }}" method="post" enctype="multipart/form-data">
     {# TODO: Form context handling - errors and past values #}
-    <input type="text" name="csrf" value="{{ csrf_token }}" hidden>
     <input type="text" name="username" placeholder="Username">
     <input type="password" name="password" placeholder="Password">
     <div class="h-captcha" data-sitekey="{{ site_key }}"></div>
