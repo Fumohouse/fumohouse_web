@@ -1,5 +1,6 @@
 @import url("/css/nav.css");
 @import url("/css/footer.css");
+@import url("/css/forms.css");
 
 html {
     font-size: 100%;
@@ -72,7 +73,7 @@ body {
     margin: 0 auto;
     margin-top: 3em;
     margin-bottom: 1em;
-    padding: 0 1em;
+    padding: 0.5em 1em;
 
     min-width: 65ch;
     max-width: 65ch;
@@ -85,4 +86,42 @@ body {
         min-width: 0;
         margin: 1em 2em;
     }
+}
+
+/* info boxes */
+
+.info {
+    padding: 0.5em;
+    background-color: rgb(30, 30, 30);
+    border-radius: 5px;
+    z-index: 0;
+}
+
+.info__title {
+    position: relative;
+
+    font-weight: bold;
+    font-size: 1.5em;
+}
+
+.info__title.warning {
+    margin-bottom: 0.7rem;
+}
+
+.info__title.warning::before {
+    content: "";
+    position: absolute;
+    bottom: -0.2rem;
+    left: 0;
+    right: 0;
+    height: 0.25rem;
+    z-index: -1;
+
+    background-image: repeating-linear-gradient(-45deg,
+            black 0 10px,
+            yellow 10px 20px);
+}
+
+.info.warning {
+    background-color: rgb(90, 74, 0);
 }

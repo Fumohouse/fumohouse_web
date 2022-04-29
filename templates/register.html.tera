@@ -1,15 +1,37 @@
 {% extends "base" %}
+{% import "macros/form" as form %}
 
 {% block title %}Register{% endblock title %}
 
 {% block content %}
 <h2>Register an account</h2>
 <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
-<form action="/auth/register?csrf_token={{ csrf_token }}" method="post" enctype="multipart/form-data">
-    {# TODO: Form context handling - errors and past values #}
-    <input type="text" name="username" placeholder="Username">
-    <input type="password" name="password" placeholder="Password">
-    <div class="h-captcha" data-sitekey="{{ site_key }}"></div>
-    <input type="submit">
-</form>
+
+{{ form::form(url="/auth/register") }}
+    <div class="form__fields">
+        {{ form::input(type="text", label="Username", name="username") }}
+        {{ form::input(type="password", label="Password", name="password") }}
+        <div class="h-captcha" data-sitekey="{{ site_key }}"></div>
+        <div class="info warning">
+            <div class="info__title warning">Warning!</div>
+            1. Registering multiple accounts is discouraged, in a gray area, and may lead to removal in the future.
+            If you have a reason to register multiple accounts, please contact an admin.
+            <br>
+            2. Please use a different password from other sites.
+            While it is unlikely Fumohouse's databases will be compromised,
+            you should not share a password between a fumo game and your email or bank.
+            Just saying.
+            <br>
+            3. Fumohouse provides no warranty and is not liable for any damages that occur on the site or its services.
+            This game is still under development.
+            Expect bugs, and at worst, security vulnerabilities. You have been warned.
+            <br>
+            <br>
+            These are essentially the terms and conditions.
+            They are subject to change at any time, and by using Fumohouse, you agree to abide by them.
+        </div>
+        <input type="submit">
+    </div>
+{{ form::endform() }}
+
 {% endblock content %}

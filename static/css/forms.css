@@ -1,0 +1,16 @@
+.form__error {
+    display: block;
+    color: red;
+}
+
+.form__fields {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+
+    margin: 0.5em 0;
+}
+
+.form__field label {
+    display: block;
+}

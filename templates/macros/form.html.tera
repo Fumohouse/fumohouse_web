@@ -1,0 +1,49 @@
+{% macro value_for(name) %}
+    {%- if name in form_context.values -%}
+        {{- form_context.values | get(key=name) | first -}}
+    {%- endif -%}
+{% endmacro value_for %}
+
+{% macro form_errors() %}
+    <div class="form__errors">
+        {% for error in form_context.form_errors %}
+            <small class="form__error">{{ error.msg }}</small>
+        {% endfor %}
+    </div>
+{% endmacro form %}
+
+{% macro field_errors(name) %}
+    {% if name in form_context.errors %}
+        <div class="form__errors">
+            {% set errors = form_context.errors | get(key=name) %}
+            {% for error in errors %}
+                <small class="form__error">{{ error.msg }}</small>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endmacro field_errors %}
+
+{% macro form(url) %}
+    <form action="{{ url ~ '?csrf_token=' ~ csrf_token }}" method="post" enctype="multipart/form-data">
+        {{ self::form_errors() }}
+{% endmacro form %}
+
+{% macro input(type, label, name, value="") %}
+    <div class="form__field">
+        <label for="{{ name }}">{{ label }}</label>
+        <input type="{{ type }}"
+            name="{{ name }}"
+            id="{{ name }}"
+            {% if type != "password" %}
+            value="{{ self::value_for(name=name) }}"
+            {% endif %}
+            placeholder="{{ label }}"
+        >
+
+        {{ self::field_errors(name=name) }}
+    </div>
+{% endmacro input %}
+
+{% macro endform() %}
+    </form>
+{% endmacro endform%}
