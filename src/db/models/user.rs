@@ -6,7 +6,7 @@ pub struct User {
     pub id: i64,
     pub username: String,
     pub password: String,
-    pub creation_date: NaiveDateTime,
+    pub created_at: NaiveDateTime,
 }
 
 #[derive(Insertable)]
