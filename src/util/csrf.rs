@@ -33,6 +33,7 @@ impl<'a> FromRequest<'a> for CsrfToken {
         let cookies = request.guard::<&CookieJar<'_>>().await.unwrap();
 
         let token = gen_token();
+        // TODO: The cookie should be marked .secure(true) in production
         cookies.add_private(Cookie::new(TOKEN_NAME, token.clone()));
 
         Success(CsrfToken { token })
@@ -40,15 +41,10 @@ impl<'a> FromRequest<'a> for CsrfToken {
 }
 
 pub struct CsrfVerify {
-    success: bool,
     new_token: String,
 }
 
 impl CsrfVerify {
-    pub fn success(&self) -> bool {
-        self.success
-    }
-
     pub fn new_token(&self) -> &str {
         &self.new_token
     }
@@ -63,6 +59,15 @@ impl CsrfVerify {
 
         Some(query.1)
     }
+
+    async fn compare_tokens<'a>(request: &'a Request<'_>) -> Option<bool> {
+        let cookies = request.guard::<&CookieJar<'_>>().await.unwrap();
+
+        let query_token = Self::get_query(request)?;
+        let cookie = cookies.get_private(TOKEN_NAME)?;
+
+        Some(query_token == cookie.value())
+    }
 }
 
 #[rocket::async_trait]
@@ -70,38 +75,37 @@ impl<'a> FromRequest<'a> for CsrfVerify {
     type Error = CsrfError;
 
     async fn from_request(request: &'a Request<'_>) -> request::Outcome<Self, Self::Error> {
-        let cookies = request.guard::<&CookieJar<'_>>().await.unwrap();
-        let mut success = false;
+        let result = Self::compare_tokens(request).await;
 
-        if let Some(query_token) = CsrfVerify::get_query(request) {
-            if let Some(cookie) = cookies.get_private(TOKEN_NAME) {
-                if cookie.value() == query_token {
-                    success = true;
+        if let Some(success) = result {
+            if success {
+                match request.guard::<CsrfToken>().await {
+                    Success(csrf) => {
+                        return Success(CsrfVerify {
+                            new_token: csrf.token,
+                        })
+                    }
+                    _ => {
+                        return Failure((
+                            Status::InternalServerError,
+                            CsrfError("Failed to generate CSRF token.".to_string()),
+                        ))
+                    }
                 }
             }
         }
 
-        if !success {
-            // TODO: Proper logging?
-            if let Some(ip) = request.client_ip() {
-                println!("CSRF violation from {}", ip);
-            } else {
-                println!("CSRF violation, unknown IP");
-            }
+        // TODO: Proper logging?
+        if let Some(ip) = request.client_ip() {
+            println!("CSRF violation from {}", ip);
+        } else {
+            println!("CSRF violation, unknown IP");
         }
 
-        match request.guard::<CsrfToken>().await {
-            Success(csrf) => {
-                return Success(CsrfVerify {
-                    success,
-                    new_token: csrf.token,
-                })
-            }
-            _ => Failure((
-                Status::InternalServerError,
-                CsrfError("Failed to generate CSRF token.".to_string()),
-            )),
-        }
+        return Failure((
+            Status::Forbidden,
+            CsrfError("CSRF verification failed.".to_string()),
+        ));
     }
 }
 

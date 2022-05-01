@@ -5,13 +5,13 @@ extern crate diesel;
 extern crate rand;
 extern crate serde;
 
+use argon2::Argon2;
 use rocket::figment::{
     util::map,
     value::{Map, Value},
 };
 use rocket::fs::FileServer;
 use rocket_dyn_templates::Template;
-use rocket_sync_db_pools::database;
 use std::env;
 
 mod db;
@@ -19,9 +19,6 @@ mod routes;
 mod util;
 
 pub use db::models;
-
-#[database("fumohouse_db")]
-struct FumohouseDb(diesel::PgConnection);
 
 #[launch]
 fn rocket() -> _ {
@@ -43,9 +40,10 @@ fn rocket() -> _ {
     let figment = rocket::Config::figment().merge(("databases", map!["fumohouse_db" => db]));
 
     rocket::custom(figment)
-        .attach(FumohouseDb::fairing())
+        .attach(db::FumohouseDb::fairing())
         .attach(Template::fairing())
         .manage(util::CaptchaVerifier::new())
+        .manage(Argon2::default())
         .mount("/", FileServer::from("static/"))
         .mount("/", routes::pages::routes())
         .mount("/auth", routes::auth::routes())
