@@ -14,13 +14,12 @@ pub struct User {
 }
 
 impl User {
-    pub fn find(c: &mut PgConnection, username: &str) -> Result<Vec<User>, Error> {
+    pub fn find(c: &mut PgConnection, username: &str) -> Result<User, Error> {
         use crate::db::schema::users::dsl::{username as username_column, users};
 
         users
             .filter(lower(username_column).eq(lower(username)))
-            .limit(1)
-            .load::<User>(c)
+            .first(c)
     }
 }
 

@@ -65,12 +65,16 @@ async fn handle_register<'a>(
 
     let existing = conn
         .run(move |c| User::find(c, &requested_username))
-        .await
-        .ok()?;
+        .await;
 
-    if existing.len() > 0 {
+    if !existing.is_err() {
         errors.push(Error::validation("Username is in use").with_name("username"));
         return None;
+    } else if let Err(e) = existing {
+        if e != diesel::result::Error::NotFound {
+            errors.push(Error::validation("An internal error occurred. Try again or contact the site admin."));
+            return None;
+        }
     }
 
     let requested_username = form_data.username.to_string();
@@ -192,9 +196,7 @@ async fn handle_login<'a>(
     use argon2::{password_hash::PasswordHash, PasswordVerifier};
 
     let username = form_data.username.to_string();
-
-    let mut user = conn.run(move |c| User::find(c, &username)).await.ok()?;
-    let user = user.remove(0);
+    let user = conn.run(move |c| User::find(c, &username)).await.ok()?;
 
     let db_hash = PasswordHash::new(&user.password).ok()?;
 
