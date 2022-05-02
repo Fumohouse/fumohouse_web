@@ -1,22 +1,22 @@
+use super::DefaultContext;
 use crate::db::{
     models::{NewUser, User},
     FumohouseDb,
 };
-use crate::util::{CaptchaVerifier, CsrfToken, CsrfVerify};
+use crate::util::{CaptchaVerifier, CsrfToken, CsrfVerify, SessionUtils};
 use argon2::{
     password_hash::{rand_core::OsRng, SaltString},
     Argon2, PasswordHasher,
 };
 use diesel::prelude::*;
 use rocket::form::{Context, Contextual, Error, Form};
-use rocket::http::Status;
+use rocket::http::{CookieJar, Status};
 use rocket::response::Redirect;
-use rocket::serde::Serialize;
 use rocket::{Route, State};
 use rocket_dyn_templates::Template;
 
 pub fn routes() -> Vec<Route> {
-    routes![register_get, register_post]
+    routes![register_get, register_post, login_get, login_post]
 }
 
 fn valid_char(c: char) -> bool {
@@ -31,7 +31,7 @@ fn valid_char(c: char) -> bool {
 }
 
 #[derive(FromForm)]
-pub struct RegisterForm<'a> {
+struct RegisterForm<'a> {
     #[field(validate = len(1..))]
     #[field(validate = with(|u| u.chars().all(valid_char), "Username contains invalid characters"))]
     username: &'a str,
@@ -41,22 +41,14 @@ pub struct RegisterForm<'a> {
     captcha_response: &'a str,
 }
 
-#[derive(Serialize)]
-struct RegisterContext<'a, 'b> {
-    csrf_token: &'a str,
-    site_key: &'a str,
-    // IDK man
-    form_context: &'a Context<'b>,
-}
-
 #[get("/register")]
 fn register_get(csrf: CsrfToken, captcha: &State<CaptchaVerifier>) -> Template {
     Template::render(
         "register",
-        RegisterContext {
-            csrf_token: &csrf.token,
-            site_key: &captcha.site_key,
-            form_context: &Context::default(),
+        DefaultContext {
+            csrf_token: Some(&csrf.token),
+            captcha_site_key: Some(&captcha.site_key),
+            form_context: Some(&Context::default()),
         },
     )
 }
@@ -67,19 +59,12 @@ async fn handle_register<'a>(
     form_data: &RegisterForm<'a>,
     errors: &mut Vec<Error<'_>>,
 ) -> Option<User> {
-    use crate::db::lower;
-    use crate::db::schema::users::{self, dsl::*};
+    use crate::db::schema::users;
 
     let requested_username = form_data.username.to_string();
-    let username_lower = requested_username.to_lowercase();
 
     let existing = conn
-        .run(|c| {
-            users
-                .filter(lower(username).eq(username_lower))
-                .limit(1)
-                .load::<User>(c)
-        })
+        .run(move |c| User::find(c, &requested_username))
         .await
         .ok()?;
 
@@ -88,6 +73,7 @@ async fn handle_register<'a>(
         return None;
     }
 
+    let requested_username = form_data.username.to_string();
     let salt = SaltString::generate(&mut OsRng);
     let hashed_pass = argon.hash_password(form_data.password.as_bytes(), &salt);
 
@@ -129,6 +115,7 @@ async fn register_post<'a>(
     captcha: &State<CaptchaVerifier>,
     argon: &State<Argon2<'_>>,
     conn: FumohouseDb,
+    cookies: &CookieJar<'_>,
 ) -> Result<Redirect, (Status, Template)> {
     // Errors are added all at once at the end of the request
     // to avoid issues with mutable references
@@ -150,8 +137,13 @@ async fn register_post<'a>(
         if captcha_success {
             let result = handle_register(&conn, &argon, form_data, &mut errors).await;
 
-            if let Some(_user) = result {
-                // TODO: login here
+            if let Some(user) = result {
+                SessionUtils::begin_session(&user, &conn, cookies)
+                    .await
+                    .unwrap_or_else(|e| {
+                        println!("Failed to start user session: {e}");
+                    });
+
                 return Ok(Redirect::to(uri!("/")));
             }
         } else {
@@ -165,10 +157,94 @@ async fn register_post<'a>(
         form.context.status(),
         Template::render(
             "register",
-            RegisterContext {
-                csrf_token: csrf.new_token(),
-                site_key: &captcha.site_key,
-                form_context: &form.context,
+            DefaultContext {
+                csrf_token: Some(csrf.new_token()),
+                captcha_site_key: Some(&captcha.site_key),
+                form_context: Some(&form.context),
+            },
+        ),
+    ))
+}
+
+#[derive(FromForm)]
+struct LoginForm<'a> {
+    username: &'a str,
+    password: &'a str,
+}
+
+#[get("/login")]
+async fn login_get(csrf: CsrfToken) -> Template {
+    Template::render(
+        "login",
+        DefaultContext {
+            csrf_token: Some(&csrf.token),
+            form_context: Some(&Context::default()),
+            ..Default::default()
+        },
+    )
+}
+
+async fn handle_login<'a>(
+    conn: &FumohouseDb,
+    argon: &Argon2<'_>,
+    form_data: &LoginForm<'a>,
+) -> Option<User> {
+    use argon2::{password_hash::PasswordHash, PasswordVerifier};
+
+    let username = form_data.username.to_string();
+
+    let mut user = conn.run(move |c| User::find(c, &username)).await.ok()?;
+    let user = user.remove(0);
+
+    let db_hash = PasswordHash::new(&user.password).ok()?;
+
+    if argon
+        .verify_password(form_data.password.as_bytes(), &db_hash)
+        .is_ok()
+    {
+        return Some(user);
+    }
+
+    None
+}
+
+#[post("/login", data = "<form>")]
+async fn login_post<'a>(
+    csrf: CsrfVerify,
+    mut form: Form<Contextual<'a, LoginForm<'a>>>,
+    argon: &State<Argon2<'_>>,
+    conn: FumohouseDb,
+    cookies: &CookieJar<'_>,
+) -> Result<Redirect, (Status, Template)> {
+    let mut errors = Vec::new();
+
+    if let Some(ref form_data) = form.value {
+        let result = handle_login(&conn, &argon, form_data).await;
+
+        match result {
+            Some(u) => {
+                SessionUtils::begin_session(&u, &conn, cookies)
+                    .await
+                    .unwrap_or_else(|e| {
+                        println!("Failed to start user session: {}", e);
+                    });
+
+                return Ok(Redirect::to(uri!("/")));
+            }
+            None => errors.push(Error::validation("Invalid username or password")),
+        }
+    }
+
+    form.context.push_errors(errors);
+
+    Err((
+        form.context.status(),
+        Template::render(
+            "login",
+            DefaultContext {
+                csrf_token: Some(&csrf.new_token()),
+                form_context: Some(&form.context),
+                ..Default::default()
             },
         ),
     ))

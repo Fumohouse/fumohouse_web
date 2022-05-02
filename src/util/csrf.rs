@@ -1,5 +1,3 @@
-use rand::distributions::Alphanumeric;
-use rand::Rng;
 use rocket::http::{Cookie, CookieJar, Status};
 use rocket::outcome::Outcome::{Failure, Success};
 use rocket::request::{self, FromRequest, Request};
@@ -32,7 +30,7 @@ impl<'a> FromRequest<'a> for CsrfToken {
     async fn from_request(request: &'a Request<'_>) -> request::Outcome<Self, Self::Error> {
         let cookies = request.guard::<&CookieJar<'_>>().await.unwrap();
 
-        let token = gen_token();
+        let token = super::rand_string(TOKEN_LENGTH);
         // TODO: The cookie should be marked .secure(true) in production
         cookies.add_private(Cookie::new(TOKEN_NAME, token.clone()));
 
@@ -107,12 +105,4 @@ impl<'a> FromRequest<'a> for CsrfVerify {
             CsrfError("CSRF verification failed.".to_string()),
         ));
     }
-}
-
-fn gen_token() -> String {
-    rand::thread_rng()
-        .sample_iter(&Alphanumeric)
-        .take(TOKEN_LENGTH)
-        .map(char::from)
-        .collect::<String>()
 }

@@ -9,9 +9,9 @@
 
 {{ form::form(url="/auth/register") }}
     <div class="form__fields">
-        {{ form::input(type="text", label="Username", name="username") }}
-        {{ form::input(type="password", label="Password", name="password") }}
-        <div class="h-captcha" data-sitekey="{{ site_key }}"></div>
+        {{ form::input(type="text", label="Username", name="username", required=true) }}
+        {{ form::input(type="password", label="Password", name="password", required=true) }}
+        <div class="h-captcha" data-sitekey="{{ captcha_site_key }}"></div>
         <div class="info warning">
             <div class="info__title warning">Warning!</div>
             1. Registering multiple accounts is discouraged, in a gray area, and may lead to removal in the future.

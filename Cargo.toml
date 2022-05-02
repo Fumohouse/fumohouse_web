@@ -4,9 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-rocket = { version = "0.5.0-rc.1", features = ["secrets"] }
-rocket_dyn_templates = { version = "0.1.0-rc.1", features = ["tera"] }
-rocket_sync_db_pools = { version = "0.1.0-rc.1", features = ["diesel_postgres_pool"] }
+rocket = { git = "https://github.com/SergioBenitez/Rocket", rev = "bf84b1c", features = ["secrets"] }
+rocket_dyn_templates = { git = "https://github.com/SergioBenitez/Rocket", rev = "bf84b1c", features = ["tera"] }
+rocket_sync_db_pools = { git = "https://github.com/SergioBenitez/Rocket", rev = "bf84b1c", features = ["diesel_postgres_pool"] }
 
 reqwest = { version = "0.11.10", features = ["json"] }
 serde = { version = "1.0", features = ["derive"] }
@@ -14,4 +14,5 @@ diesel = { version = "1.4.8", features = ["postgres", "chrono"] }
 chrono = "0.4.19"
 dotenvy = "0.15.1"
 argon2 = "0.4.0"
-rand = { version = "0.8.5" }
+rand = "0.8.5"
+sha2 = "0.10.2"

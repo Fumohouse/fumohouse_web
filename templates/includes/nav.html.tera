@@ -16,7 +16,6 @@
         <a class="nav__link" href="#">Changelog</a>
         <a class="nav__link" href="#">Download</a>
         <a class="nav__link" href="#">About</a>
-        <a class="nav__link" href="#">Login</a>
-        <a class="nav__link" href="/auth/register">Register</a>
+        <a class="nav__link" href="/auth/login">Login / Sign Up</a>
     </nav>
 </header>

@@ -1,0 +1,19 @@
+{% extends "base" %}
+{% import "macros/form" as form %}
+
+{% block title %}Login{% endblock title %}
+
+{% block content %}
+<h2>Login</h2>
+
+{{ form::form(url="/auth/login") }}
+    <div class="form__fields">
+        {{ form::input(type="text", label="Username", name="username", required=true) }}
+        {{ form::input(type="password", label="Password", name="password", required=true) }}
+
+        <input type="submit">
+    </div>
+{{ form::endform() }}
+
+<p><i>Don't have an account? <a href="/auth/register">Register here.</a></i></p>
+{% endblock content %}

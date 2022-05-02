@@ -28,7 +28,7 @@
         {{ self::form_errors() }}
 {% endmacro form %}
 
-{% macro input(type, label, name, value="") %}
+{% macro input(type, label, name, value="", required=false) %}
     <div class="form__field">
         <label for="{{ name }}">{{ label }}</label>
         <input type="{{ type }}"
@@ -38,6 +38,9 @@
             value="{{ self::value_for(name=name) }}"
             {% endif %}
             placeholder="{{ label }}"
+            {% if required %}
+            required
+            {% endif %}
         >
 
         {{ self::field_errors(name=name) }}

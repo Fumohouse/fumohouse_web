@@ -1,12 +1,27 @@
+use crate::db::lower;
 use crate::db::schema::users;
-use chrono::NaiveDateTime;
+use chrono::{DateTime, Utc};
+use diesel::prelude::*;
+use diesel::result::Error;
+use diesel::PgConnection;
 
 #[derive(Queryable)]
 pub struct User {
     pub id: i64,
     pub username: String,
     pub password: String,
-    pub created_at: NaiveDateTime,
+    pub created_at: DateTime<Utc>,
+}
+
+impl User {
+    pub fn find(c: &mut PgConnection, username: &str) -> Result<Vec<User>, Error> {
+        use crate::db::schema::users::dsl::{username as username_column, users};
+
+        users
+            .filter(lower(username_column).eq(lower(username)))
+            .limit(1)
+            .load::<User>(c)
+    }
 }
 
 #[derive(Insertable)]

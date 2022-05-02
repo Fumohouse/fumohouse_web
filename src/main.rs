@@ -19,6 +19,7 @@ mod routes;
 mod util;
 
 pub use db::models;
+use util::SessionUtils;
 
 #[launch]
 fn rocket() -> _ {
@@ -42,6 +43,7 @@ fn rocket() -> _ {
     rocket::custom(figment)
         .attach(db::FumohouseDb::fairing())
         .attach(Template::fairing())
+        .attach(SessionUtils::fairing())
         .manage(util::CaptchaVerifier::new())
         .manage(Argon2::default())
         .mount("/", FileServer::from("static/"))
