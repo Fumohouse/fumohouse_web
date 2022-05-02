@@ -3,7 +3,7 @@ use crate::db::{
     models::{NewUser, User},
     FumohouseDb,
 };
-use crate::util::{CaptchaVerifier, CsrfToken, CsrfVerify, SessionUtils};
+use crate::util::{CaptchaVerifier, CsrfToken, CsrfVerify, SessionUtils, SiteMessages};
 use argon2::{
     password_hash::{rand_core::OsRng, SaltString},
     Argon2, PasswordHasher,
@@ -33,7 +33,7 @@ fn valid_char(c: char) -> bool {
 #[derive(FromForm)]
 struct RegisterForm<'a> {
     #[field(validate = len(1..))]
-    #[field(validate = with(|u| u.chars().all(valid_char), "Username contains invalid characters"))]
+    #[field(validate = with(|u| u.chars().all(valid_char), SiteMessages::UsernameInvalid.description()))]
     username: &'a str,
     #[field(validate = len(8..))]
     password: &'a str,
@@ -63,16 +63,14 @@ async fn handle_register<'a>(
 
     let requested_username = form_data.username.to_string();
 
-    let existing = conn
-        .run(move |c| User::find(c, &requested_username))
-        .await;
+    let existing = conn.run(move |c| User::find(c, &requested_username)).await;
 
     if !existing.is_err() {
-        errors.push(Error::validation("Username is in use").with_name("username"));
+        errors.push(SiteMessages::UsernameInUse.into());
         return None;
     } else if let Err(e) = existing {
         if e != diesel::result::Error::NotFound {
-            errors.push(Error::validation("An internal error occurred. Try again or contact the site admin."));
+            errors.push(Error::validation(SiteMessages::GenericError.to_string()));
             return None;
         }
     }
@@ -102,9 +100,7 @@ async fn handle_register<'a>(
             return Some(new_user);
         }
         Err(err) => {
-            errors.push(Error::validation(
-                "Failed to hash password. Please contact site admin.",
-            ));
+            errors.push(SiteMessages::GenericError.into());
             println!("Hash failed: {}", err);
         }
     }
@@ -129,11 +125,8 @@ async fn register_post<'a>(
         let captcha_success = captcha
             .verify(form_data.captcha_response)
             .await
-            .unwrap_or_else(|err| {
-                errors.push(Error::validation(format!(
-                    "CAPTCHA verification failed: {}",
-                    err.to_string()
-                )));
+            .unwrap_or_else(|_| {
+                errors.push(SiteMessages::GenericError.into());
 
                 false
             });
@@ -151,7 +144,7 @@ async fn register_post<'a>(
                 return Ok(Redirect::to(uri!("/")));
             }
         } else {
-            errors.push(Error::validation("Incorrect CAPTCHA response"));
+            errors.push(SiteMessages::CAPTCHAFailed.into());
         }
     }
 
@@ -218,7 +211,7 @@ async fn login_post<'a>(
     conn: FumohouseDb,
     cookies: &CookieJar<'_>,
 ) -> Result<Redirect, (Status, Template)> {
-    let mut errors = Vec::new();
+    let mut errors: Vec<Error> = Vec::new();
 
     if let Some(ref form_data) = form.value {
         let result = handle_login(&conn, &argon, form_data).await;
@@ -233,7 +226,7 @@ async fn login_post<'a>(
 
                 return Ok(Redirect::to(uri!("/")));
             }
-            None => errors.push(Error::validation("Invalid username or password")),
+            None => errors.push(SiteMessages::LoginFailed.into()),
         }
     }
 
