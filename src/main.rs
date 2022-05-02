@@ -49,7 +49,7 @@ fn rocket() -> _ {
     rocket::custom(figment)
         .attach(db::FumohouseDb::fairing())
         .attach(Template::fairing())
-        .attach(SessionUtils::fairing())
+        .attach(SessionUtils)
         .manage(util::CaptchaVerifier::new())
         .manage(Argon2::default())
         .mount("/", FileServer::from("static/"))

@@ -5,9 +5,10 @@ use crate::db::{
 };
 use chrono::{offset::Utc, Duration};
 use diesel::prelude::*;
-use rocket::fairing::AdHoc;
+use rocket::fairing::{Fairing, Info, Kind};
 use rocket::http::{Cookie, CookieJar};
 use rocket::time::{Duration as TDuration, OffsetDateTime};
+use rocket::Rocket;
 use std::error::Error;
 
 const SESSION_COOKIE_NAME: &str = "fh_session";
@@ -17,41 +18,47 @@ const SESSION_EXPIRY: i64 = 30 * 24; // hours
 const SESSION_PURGE: u64 = 30 * 60; // seconds
 pub struct SessionUtils;
 
-impl SessionUtils {
-    pub fn fairing() -> AdHoc {
+#[rocket::async_trait]
+impl Fairing for SessionUtils {
+    fn info(&self) -> Info {
+        Info {
+            name: "purge expired sessions",
+            kind: Kind::Liftoff,
+        }
+    }
+
+    async fn on_liftoff(&self, rocket: &Rocket<rocket::Orbit>) {
         use crate::db::schema::sessions::dsl::*;
         use rocket::tokio::{
             self,
             time::{self, Duration},
         };
 
-        AdHoc::on_liftoff("purge sessions", |rocket| {
-            Box::pin(async move {
-                let conn = FumohouseDb::get_one(rocket).await.unwrap();
+        let conn = FumohouseDb::get_one(rocket).await.unwrap();
 
-                tokio::spawn(async move {
-                    let mut interval = time::interval(Duration::from_secs(SESSION_PURGE));
+        tokio::spawn(async move {
+            let mut interval = time::interval(Duration::from_secs(SESSION_PURGE));
 
-                    loop {
-                        interval.tick().await;
+            loop {
+                interval.tick().await;
 
-                        let result = conn
-                            .run(|c| {
-                                let now = Utc::now();
-                                diesel::delete(sessions.filter(expires_at.lt(now))).execute(c)
-                            })
-                            .await;
+                let result = conn
+                    .run(|c| {
+                        let now = Utc::now();
+                        diesel::delete(sessions.filter(expires_at.lt(now))).execute(c)
+                    })
+                    .await;
 
-                        match result {
-                            Ok(count) => info!("session: purged {} expired sessions", count),
-                            Err(err) => error!("fairing: error purging sessions: {}", err),
-                        }
-                    }
-                });
-            })
-        })
+                match result {
+                    Ok(count) => info!("session: purged {} expired sessions", count),
+                    Err(err) => error!("fairing: error purging sessions: {}", err),
+                }
+            }
+        });
     }
+}
 
+impl SessionUtils {
     pub async fn begin_session(
         user: &User,
         conn: &FumohouseDb,
