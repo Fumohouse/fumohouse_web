@@ -1,10 +1,15 @@
+use fern::{
+    colors::{Color, ColoredLevelConfig},
+    Dispatch, InitError,
+};
+use log::LevelFilter;
 use rand::{distributions::Alphanumeric, Rng};
 use sha2::{Digest, Sha256};
 
 mod captcha;
 mod csrf;
-mod session;
 mod messages;
+mod session;
 
 pub use captcha::CaptchaVerifier;
 
@@ -14,6 +19,35 @@ pub use csrf::CsrfVerify;
 pub use session::SessionUtils;
 
 pub use messages::SiteMessages;
+
+pub fn setup_logging(debug: bool) -> Result<(), InitError> {
+    let colors = ColoredLevelConfig::new()
+        .debug(Color::Green)
+        .info(Color::Blue)
+        .warn(Color::Yellow)
+        .error(Color::Red)
+        .trace(Color::Magenta);
+
+    Dispatch::new()
+        .format(move |out, message, record| {
+            out.finish(format_args!(
+                "{} > {} > {} - {}",
+                chrono::Local::now().format("%Y-%m-%d %H:%M:%S"),
+                record.target(),
+                colors.color(record.level()),
+                message
+            ))
+        })
+        .level(if debug {
+            LevelFilter::Debug
+        } else {
+            LevelFilter::Info
+        })
+        .chain(std::io::stdout())
+        .apply()?;
+
+    Ok(())
+}
 
 fn rand_string(length: usize) -> String {
     rand::thread_rng()

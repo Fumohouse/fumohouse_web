@@ -93,11 +93,9 @@ impl<'a> FromRequest<'a> for CsrfVerify {
             }
         }
 
-        // TODO: Proper logging?
-        if let Some(ip) = request.client_ip() {
-            println!("CSRF violation from {}", ip);
-        } else {
-            println!("CSRF violation, unknown IP");
+        match request.client_ip() {
+            Some(ip) => info!("csrf violation from: {}", ip),
+            None => info!("csrf violation from unknown ip"),
         }
 
         return Failure((

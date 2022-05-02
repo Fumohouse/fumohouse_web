@@ -4,15 +4,23 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+# Rocket
 rocket = { git = "https://github.com/SergioBenitez/Rocket", rev = "bf84b1c", features = ["secrets"] }
 rocket_dyn_templates = { git = "https://github.com/SergioBenitez/Rocket", rev = "bf84b1c", features = ["tera"] }
 rocket_sync_db_pools = { git = "https://github.com/SergioBenitez/Rocket", rev = "bf84b1c", features = ["diesel_postgres_pool"] }
 
-reqwest = { version = "0.11.10", features = ["json"] }
+# Crypto
+argon2 = "0.4"
+sha2 = "0.10"
+rand = "0.8"
+
+# Logging
+fern = { version = "0.6", features = ["colored"] }
+log = "0.4"
+
+# Other
+reqwest = { version = "0.11", features = ["json"] }
 serde = { version = "1.0", features = ["derive"] }
-diesel = { version = "1.4.8", features = ["postgres", "chrono"] }
-chrono = "0.4.19"
-dotenvy = "0.15.1"
-argon2 = "0.4.0"
-rand = "0.8.5"
-sha2 = "0.10.2"
+diesel = { version = "1.4", features = ["postgres", "chrono"] }
+chrono = "0.4"
+dotenvy = "0.15"

@@ -68,9 +68,10 @@ async fn handle_register<'a>(
     if !existing.is_err() {
         errors.push(SiteMessages::UsernameInUse.into());
         return None;
-    } else if let Err(e) = existing {
-        if e != diesel::result::Error::NotFound {
+    } else if let Err(err) = existing {
+        if err != diesel::result::Error::NotFound {
             errors.push(Error::validation(SiteMessages::GenericError.to_string()));
+            error!("registration: diesel errored when trying to find user: {}", err);
             return None;
         }
     }
@@ -97,11 +98,13 @@ async fn handle_register<'a>(
                 .await
                 .ok()?;
 
+            info!("registration: new user: {}", new_user.username);
+
             return Some(new_user);
         }
         Err(err) => {
             errors.push(SiteMessages::GenericError.into());
-            println!("Hash failed: {}", err);
+            error!("registration: hash failed: {}", err);
         }
     }
 
@@ -125,8 +128,9 @@ async fn register_post<'a>(
         let captcha_success = captcha
             .verify(form_data.captcha_response)
             .await
-            .unwrap_or_else(|_| {
+            .unwrap_or_else(|err| {
                 errors.push(SiteMessages::GenericError.into());
+                error!("registration: captcha verification failed: {}", err);
 
                 false
             });
@@ -137,8 +141,8 @@ async fn register_post<'a>(
             if let Some(user) = result {
                 SessionUtils::begin_session(&user, &conn, cookies)
                     .await
-                    .unwrap_or_else(|e| {
-                        println!("Failed to start user session: {e}");
+                    .unwrap_or_else(|err| {
+                        error!("registration: failed to start user session: {}", err);
                     });
 
                 return Ok(Redirect::to(uri!("/")));
@@ -197,6 +201,7 @@ async fn handle_login<'a>(
         .verify_password(form_data.password.as_bytes(), &db_hash)
         .is_ok()
     {
+        info!("login: new login: {}", user.username);
         return Some(user);
     }
 
@@ -220,8 +225,8 @@ async fn login_post<'a>(
             Some(u) => {
                 SessionUtils::begin_session(&u, &conn, cookies)
                     .await
-                    .unwrap_or_else(|e| {
-                        println!("Failed to start user session: {}", e);
+                    .unwrap_or_else(|err| {
+                        error!("login: failed to start user session: {}", err);
                     });
 
                 return Ok(Redirect::to(uri!("/")));

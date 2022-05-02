@@ -2,6 +2,9 @@
 extern crate rocket;
 #[macro_use]
 extern crate diesel;
+#[macro_use]
+extern crate log;
+extern crate fern;
 extern crate rand;
 extern crate serde;
 
@@ -23,10 +26,13 @@ use util::SessionUtils;
 
 #[launch]
 fn rocket() -> _ {
-    if cfg!(debug_assertions) {
-        println!("Loading environment variables from .env.");
-        if let Err(e) = dotenvy::dotenv() {
-            println!("Failed to load .env: {}", e);
+    let is_debug = cfg!(debug_assertions);
+    util::setup_logging(is_debug).expect("Logger setup failed.");
+
+    if is_debug {
+        info!("Loading environment variables from .env.");
+        if let Err(err) = dotenvy::dotenv() {
+            warn!("Failed to load .env: {}", err);
         }
     }
 

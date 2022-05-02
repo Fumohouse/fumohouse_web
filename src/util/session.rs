@@ -43,8 +43,8 @@ impl SessionUtils {
                             .await;
 
                         match result {
-                            Ok(count) => println!("Purged {} sessions.", count),
-                            Err(e) => println!("Error purging sessions: {}", e),
+                            Ok(count) => info!("session: purged {} expired sessions", count),
+                            Err(err) => error!("fairing: error purging sessions: {}", err),
                         }
                     }
                 });
