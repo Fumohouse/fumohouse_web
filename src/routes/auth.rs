@@ -3,12 +3,14 @@ use crate::db::{
     models::{NewUser, User},
     FumohouseDb,
 };
-use crate::util::{CaptchaVerifier, CsrfToken, CsrfVerify, SessionUtils, SiteMessages};
+use crate::util::{
+    CaptchaVerifier, CsrfToken, CsrfVerify, SessionUtils, SiteMessages, UserSession,
+};
 use argon2::{
     password_hash::{rand_core::OsRng, SaltString},
     Argon2, PasswordHasher,
 };
-use diesel::prelude::*;
+use diesel::{prelude::*, result::Error as DieselError};
 use rocket::form::{Context, Contextual, Error, Form};
 use rocket::http::{CookieJar, Status};
 use rocket::response::Redirect;
@@ -42,15 +44,24 @@ struct RegisterForm<'a> {
 }
 
 #[get("/register")]
-fn register_get(csrf: CsrfToken, captcha: &State<CaptchaVerifier>) -> Template {
-    Template::render(
+fn register_get(
+    user_session: UserSession,
+    csrf: CsrfToken,
+    captcha: &State<CaptchaVerifier>,
+) -> Result<Template, Redirect> {
+    if user_session.user.is_some() {
+        return Err(Redirect::to(uri!("/")));
+    }
+
+    Ok(Template::render(
         "register",
         DefaultContext {
             csrf_token: Some(&csrf.token),
             captcha_site_key: Some(&captcha.site_key),
             form_context: Some(&Context::default()),
+            ..Default::default()
         },
-    )
+    ))
 }
 
 async fn handle_register<'a>(
@@ -69,9 +80,12 @@ async fn handle_register<'a>(
         errors.push(SiteMessages::UsernameInUse.into());
         return None;
     } else if let Err(err) = existing {
-        if err != diesel::result::Error::NotFound {
+        if err != DieselError::NotFound {
             errors.push(Error::validation(SiteMessages::GenericError.to_string()));
-            error!("registration: diesel errored when trying to find user: {}", err);
+            error!(
+                "registration: diesel errored when trying to find user: {}",
+                err
+            );
             return None;
         }
     }
@@ -162,6 +176,7 @@ async fn register_post<'a>(
                 csrf_token: Some(csrf.new_token()),
                 captcha_site_key: Some(&captcha.site_key),
                 form_context: Some(&form.context),
+                ..Default::default()
             },
         ),
     ))
@@ -174,15 +189,19 @@ struct LoginForm<'a> {
 }
 
 #[get("/login")]
-async fn login_get(csrf: CsrfToken) -> Template {
-    Template::render(
+async fn login_get(user_session: UserSession, csrf: CsrfToken) -> Result<Template, Redirect> {
+    if user_session.user.is_some() {
+        return Err(Redirect::to(uri!("/")));
+    }
+
+    Ok(Template::render(
         "login",
         DefaultContext {
             csrf_token: Some(&csrf.token),
             form_context: Some(&Context::default()),
             ..Default::default()
         },
-    )
+    ))
 }
 
 async fn handle_login<'a>(

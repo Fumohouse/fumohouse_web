@@ -16,6 +16,10 @@
         <a class="nav__link" href="#">Changelog</a>
         <a class="nav__link" href="#">Download</a>
         <a class="nav__link" href="#">About</a>
+        {% if user %}
+        <a href="#" class="nav__link">{{ user.username }}</a>
+        {% else %}
         <a class="nav__link" href="/auth/login">Login / Sign Up</a>
+        {% endif %}
     </nav>
 </header>

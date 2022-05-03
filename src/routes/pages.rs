@@ -1,3 +1,4 @@
+use crate::util::UserSession;
 use rocket::Route;
 use rocket_dyn_templates::Template;
 
@@ -6,6 +7,9 @@ pub fn routes() -> Vec<Route> {
 }
 
 #[get("/")]
-fn index() -> Template {
-    Template::render("index", &super::EmptyContext {})
+fn index(user_session: UserSession) -> Template {
+    Template::render("index", super::DefaultContext {
+        user: user_session.user,
+        ..Default::default()
+    })
 }

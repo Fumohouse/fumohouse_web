@@ -16,7 +16,7 @@ pub use captcha::CaptchaVerifier;
 pub use csrf::CsrfToken;
 pub use csrf::CsrfVerify;
 
-pub use session::SessionUtils;
+pub use session::{SessionUtils, UserSession};
 
 pub use messages::SiteMessages;
 

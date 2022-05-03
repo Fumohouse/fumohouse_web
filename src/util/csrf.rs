@@ -1,21 +1,22 @@
-use rocket::http::{Cookie, CookieJar, Status};
-use rocket::outcome::Outcome::{Failure, Success};
-use rocket::request::{self, FromRequest, Request};
-use std::error::Error;
-use std::fmt::{self, Display};
+use rocket::{
+    http::{Cookie, CookieJar, Status},
+    outcome::Outcome::{Failure, Success},
+    request::{FromRequest, Outcome, Request},
+};
 use std::{option::Option, str};
 
 pub const TOKEN_NAME: &str = "csrf_token";
 const TOKEN_LENGTH: usize = 64;
 
-#[derive(Debug)]
-pub struct CsrfError(String);
-
-impl Error for CsrfError {}
-
-impl Display for CsrfError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.0)
+quick_error! {
+    #[derive(Debug)]
+    pub enum CsrfError {
+        VerificationFailed {
+            display("CSRF verification failed.")
+        }
+        GenerationFailed {
+            display("Failed to generate CSRF token.")
+        }
     }
 }
 
@@ -27,7 +28,7 @@ pub struct CsrfToken {
 impl<'a> FromRequest<'a> for CsrfToken {
     type Error = CsrfError;
 
-    async fn from_request(request: &'a Request<'_>) -> request::Outcome<Self, Self::Error> {
+    async fn from_request(request: &'a Request<'_>) -> Outcome<Self, Self::Error> {
         let cookies = request.guard::<&CookieJar<'_>>().await.unwrap();
 
         let token = super::rand_string(TOKEN_LENGTH);
@@ -72,7 +73,7 @@ impl CsrfVerify {
 impl<'a> FromRequest<'a> for CsrfVerify {
     type Error = CsrfError;
 
-    async fn from_request(request: &'a Request<'_>) -> request::Outcome<Self, Self::Error> {
+    async fn from_request(request: &'a Request<'_>) -> Outcome<Self, Self::Error> {
         let result = Self::compare_tokens(request).await;
 
         if let Some(success) = result {
@@ -86,7 +87,7 @@ impl<'a> FromRequest<'a> for CsrfVerify {
                     _ => {
                         return Failure((
                             Status::InternalServerError,
-                            CsrfError("Failed to generate CSRF token.".to_string()),
+                            CsrfError::GenerationFailed,
                         ))
                     }
                 }
@@ -100,7 +101,7 @@ impl<'a> FromRequest<'a> for CsrfVerify {
 
         return Failure((
             Status::Forbidden,
-            CsrfError("CSRF verification failed.".to_string()),
+            CsrfError::VerificationFailed,
         ));
     }
 }

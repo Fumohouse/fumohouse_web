@@ -1,11 +1,9 @@
-use crate::db::lower;
-use crate::db::schema::users;
+use crate::db::{lower, schema::users};
 use chrono::{DateTime, Utc};
-use diesel::prelude::*;
-use diesel::result::Error;
-use diesel::PgConnection;
+use diesel::{prelude::*, result::Error, PgConnection};
+use rocket::serde::Serialize;
 
-#[derive(Queryable)]
+#[derive(Queryable, Serialize)]
 pub struct User {
     pub id: i64,
     pub username: String,

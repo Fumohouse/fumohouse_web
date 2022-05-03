@@ -4,6 +4,8 @@ extern crate rocket;
 extern crate diesel;
 #[macro_use]
 extern crate log;
+#[macro_use]
+extern crate quick_error;
 extern crate fern;
 extern crate rand;
 extern crate serde;
