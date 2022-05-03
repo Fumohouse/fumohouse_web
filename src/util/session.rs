@@ -1,22 +1,22 @@
-// Three different types of `Duration` are used in this file. Beware!
 use crate::db::{
     models::{NewSession, Session, User},
     FumohouseDb,
 };
-use chrono::{offset::Utc, DateTime, Duration};
+use chrono::{offset::Utc, DateTime, Duration as ChronoDuration};
 use diesel::{prelude::*, result::Error as DieselError};
 use rocket::{
     fairing::{Fairing, Info, Kind},
     http::{Cookie, CookieJar, Status},
     outcome::Outcome::{Failure, Success},
     request::{FromRequest, Outcome, Request},
-    time::{Duration as TDuration, OffsetDateTime},
+    time::{Duration as CookieDuration, OffsetDateTime},
     Rocket,
 };
 use std::error::Error;
 
 const SESSION_COOKIE_NAME: &str = "fh_session";
 const SESSION_ID_LENGTH: usize = 32;
+const SESSION_RENEW: i64 = 15; // minutes
 const SESSION_EXPIRY: i64 = 30 * 24; // hours
 
 const SESSION_PURGE: u64 = 30 * 60; // seconds
@@ -36,13 +36,13 @@ impl Fairing for SessionUtils {
         use crate::db::schema::sessions::dsl::*;
         use rocket::tokio::{
             self,
-            time::{self, Duration},
+            time::{self, Duration as TokioDuration},
         };
 
         let conn = FumohouseDb::get_one(rocket).await.unwrap();
 
         tokio::spawn(async move {
-            let mut interval = time::interval(Duration::from_secs(SESSION_PURGE));
+            let mut interval = time::interval(TokioDuration::from_secs(SESSION_PURGE));
 
             loop {
                 interval.tick().await;
@@ -71,14 +71,39 @@ impl SessionUtils {
     }
 
     fn chrono_expiry_now() -> DateTime<Utc> {
-        Utc::now() + Duration::hours(SESSION_EXPIRY)
+        Utc::now() + ChronoDuration::hours(SESSION_EXPIRY)
     }
 
     fn set_cookie(cookies: &CookieJar<'_>, session_id: String) {
         let mut cookie = Cookie::new(SESSION_COOKIE_NAME, session_id);
-        cookie.set_expires(OffsetDateTime::now_utc() + TDuration::hours(SESSION_EXPIRY));
+        cookie.set_expires(OffsetDateTime::now_utc() + CookieDuration::hours(SESSION_EXPIRY));
 
         cookies.add_private(cookie);
+    }
+
+    async fn renew_session(
+        conn: &FumohouseDb,
+        cookies: &CookieJar<'_>,
+        session_primary_key: i64,
+    ) -> Result<(), DieselError> {
+        use crate::db::schema::sessions::dsl::*;
+
+        let (new_sid, new_hash) = Self::new_session_id();
+
+        conn.run(move |c| {
+            diesel::update(sessions.filter(id.eq(session_primary_key)))
+                .set((
+                    session_id.eq(new_hash),
+                    modified_at.eq(Utc::now()),
+                    expires_at.eq(Self::chrono_expiry_now()),
+                ))
+                .execute(c)
+        })
+        .await?;
+
+        Self::set_cookie(cookies, new_sid);
+
+        Ok(())
     }
 
     pub async fn begin_session(
@@ -138,7 +163,10 @@ impl<'a> FromRequest<'a> for UserSession {
     type Error = SessionError;
 
     async fn from_request(request: &'a Request<'_>) -> Outcome<Self, Self::Error> {
-        use crate::db::schema::{sessions::dsl::*, users};
+        use crate::db::schema::{
+            sessions::{self, dsl::*},
+            users,
+        };
 
         let cookies = request.guard::<&CookieJar<'_>>().await.unwrap();
         let conn = request.guard::<FumohouseDb>().await.unwrap();
@@ -155,37 +183,26 @@ impl<'a> FromRequest<'a> for UserSession {
                 sessions
                     .filter(session_id.eq(token_hash))
                     .inner_join(users::table)
-                    .select((users::all_columns, id))
-                    .first::<(User, i64)>(c)
+                    .select((users::all_columns, sessions::all_columns))
+                    .first::<(User, Session)>(c)
             })
             .await;
 
         match result {
-            Ok((user, session_pk)) => {
-                let (new_sid, new_hash) = SessionUtils::new_session_id();
+            Ok((user, session)) => {
+                if session.since_last_modify().num_minutes() > SESSION_RENEW {
+                    let renew_result =
+                        SessionUtils::renew_session(&conn, cookies, session.id).await;
 
-                let update_result = conn
-                    .run(move |c| {
-                        diesel::update(sessions.filter(id.eq(session_pk)))
-                            .set((
-                                session_id.eq(new_hash),
-                                modified_at.eq(Utc::now()),
-                                expires_at.eq(SessionUtils::chrono_expiry_now()),
-                            ))
-                            .execute(c)
-                    })
-                    .await;
+                    if let Err(diesel_error) = renew_result {
+                        return Failure((
+                            Status::InternalServerError,
+                            SessionError::RenewFailed { diesel_error },
+                        ));
+                    }
 
-                if let Err(diesel_error) = update_result {
-                    return Failure((
-                        Status::InternalServerError,
-                        SessionError::RenewFailed { diesel_error },
-                    ));
+                    info!("session: renewed session of {}", user.username);
                 }
-
-                SessionUtils::set_cookie(cookies, new_sid);
-
-                info!("session: renewed session of {}", user.username);
 
                 return Success(UserSession { user: Some(user) });
             }

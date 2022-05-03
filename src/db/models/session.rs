@@ -1,5 +1,5 @@
 use crate::db::schema::sessions;
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Utc, Duration};
 
 #[derive(Queryable)]
 pub struct Session {
@@ -9,6 +9,19 @@ pub struct Session {
     pub created_at: DateTime<Utc>,
     pub modified_at: Option<DateTime<Utc>>,
     pub expires_at: DateTime<Utc>,
+}
+
+impl Session {
+    pub fn since_last_modify(&self) -> Duration {
+        Utc::now() - self.last_modify()
+    }
+
+    pub fn last_modify(&self) -> DateTime<Utc> {
+        match self.modified_at {
+            Some(date_time) => date_time,
+            None => self.created_at,
+        }
+    }
 }
 
 #[derive(Insertable)]
