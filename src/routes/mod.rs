@@ -5,13 +5,24 @@ pub mod auth;
 pub mod pages;
 
 #[derive(Serialize)]
-#[serde(crate = "rocket::serde")]
-pub struct EmptyContext {}
-
-#[derive(Default, Serialize)]
-pub struct DefaultContext<'a, 'b> {
+pub struct BaseData<'a> {
     user: Option<User>,
-    csrf_token: Option<&'a str>,
+    csrf_token: &'a str,
+}
+
+#[derive(Serialize)]
+pub struct DefaultContext<'a, 'b> {
+    base: BaseData<'a>,
     captcha_site_key: Option<&'a str>,
     form_context: Option<&'a Context<'b>>,
+}
+
+impl DefaultContext<'_, '_> {
+    pub fn base_only<'a, 'b>(base: BaseData<'a>) -> DefaultContext<'a, 'b> {
+        DefaultContext {
+            base,
+            captcha_site_key: None,
+            form_context: None,
+        }
+    }
 }

@@ -81,31 +81,6 @@ impl SessionUtils {
         cookies.add_private(cookie);
     }
 
-    async fn renew_session(
-        conn: &FumohouseDb,
-        cookies: &CookieJar<'_>,
-        session_primary_key: i64,
-    ) -> Result<(), DieselError> {
-        use crate::db::schema::sessions::dsl::*;
-
-        let (new_sid, new_hash) = Self::new_session_id();
-
-        conn.run(move |c| {
-            diesel::update(sessions.filter(id.eq(session_primary_key)))
-                .set((
-                    session_id.eq(new_hash),
-                    modified_at.eq(Utc::now()),
-                    expires_at.eq(Self::chrono_expiry_now()),
-                ))
-                .execute(c)
-        })
-        .await?;
-
-        Self::set_cookie(cookies, new_sid);
-
-        Ok(())
-    }
-
     pub async fn begin_session(
         user: &User,
         conn: &FumohouseDb,
@@ -133,6 +108,51 @@ impl SessionUtils {
 
         Ok(())
     }
+
+    async fn renew_session(
+        conn: &FumohouseDb,
+        cookies: &CookieJar<'_>,
+        session_primary_key: i64,
+    ) -> Result<(), DieselError> {
+        use crate::db::schema::sessions::dsl::*;
+
+        let (new_sid, new_hash) = Self::new_session_id();
+
+        conn.run(move |c| {
+            diesel::update(sessions.filter(id.eq(session_primary_key)))
+                .set((
+                    session_id.eq(new_hash),
+                    modified_at.eq(Utc::now()),
+                    expires_at.eq(Self::chrono_expiry_now()),
+                ))
+                .execute(c)
+        })
+        .await?;
+
+        Self::set_cookie(cookies, new_sid);
+
+        Ok(())
+    }
+
+    pub async fn end_session(
+        conn: &FumohouseDb,
+        cookies: &CookieJar<'_>,
+        session: &Session,
+    ) -> Result<(), DieselError> {
+        use crate::db::schema::sessions::dsl::*;
+
+        let id_to_delete = session.id;
+
+        conn.run(move |c| {
+            diesel::delete(sessions)
+                .filter(id.eq(id_to_delete))
+                .execute(c)
+        }).await?;
+
+        cookies.remove_private(Cookie::named(SESSION_COOKIE_NAME));
+
+        Ok(())
+    }
 }
 
 quick_error! {
@@ -156,6 +176,7 @@ quick_error! {
 #[derive(Default)]
 pub struct UserSession {
     pub user: Option<User>,
+    pub session: Option<Session>,
 }
 
 #[rocket::async_trait]
@@ -204,7 +225,10 @@ impl<'a> FromRequest<'a> for UserSession {
                     info!("session: renewed session of {}", user.username);
                 }
 
-                return Success(UserSession { user: Some(user) });
+                return Success(UserSession {
+                    user: Some(user),
+                    session: Some(session),
+                });
             }
             Err(diesel_error) => match diesel_error {
                 DieselError::NotFound => Success(UserSession::default()),

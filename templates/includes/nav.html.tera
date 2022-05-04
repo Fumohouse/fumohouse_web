@@ -22,9 +22,11 @@
         {{ nav_util::link(id="download", label="Download" )}}
         {{ nav_util::link(id="about", label="About" )}}
 
-        {% if user %}
-        {{ nav::begin(id="account", label=user.username, href="#", subnav="right") }}
-            <a href="#" class="nav__link">Logout</a>
+        {% if base.user %}
+        {{ nav::begin(id="account", label=base.user.username, href="#", subnav="right") }}
+            <form class="nav__logout" action="/auth/logout?csrf_token={{ base.csrf_token }}" method="post">
+                <button class="nav__link nav__logout-button" type="submit">Logout</button>
+            </form>
         {{ nav::end(subnav=true) }}
         {% else %}
         {{ nav_util::link(id="login", label="Login / Sign Up", href="/auth/login") }}

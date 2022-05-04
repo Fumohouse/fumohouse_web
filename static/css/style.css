@@ -12,6 +12,8 @@ html {
     --nav-bg: rgb(0, 39, 78);
     --border-radius: 8px;
     --horiz-padding: 5%;
+
+    --link-hover: rgb(220, 220, 220);
 }
 
 a {
@@ -20,7 +22,7 @@ a {
 
 @media (hover) {
     a:hover {
-        color: rgb(220, 220, 220);
+        color: var(--link-hover);
     }
 }
 

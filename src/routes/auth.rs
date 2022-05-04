@@ -1,4 +1,4 @@
-use super::DefaultContext;
+use super::{BaseData, DefaultContext};
 use crate::db::{
     models::{NewUser, User},
     FumohouseDb,
@@ -18,7 +18,7 @@ use rocket::{Route, State};
 use rocket_dyn_templates::Template;
 
 pub fn routes() -> Vec<Route> {
-    routes![register_get, register_post, login_get, login_post]
+    routes![register_get, register_post, login_get, login_post, logout]
 }
 
 fn valid_char(c: char) -> bool {
@@ -56,10 +56,12 @@ fn register_get(
     Ok(Template::render(
         "register",
         DefaultContext {
-            csrf_token: Some(&csrf.token),
+            base: BaseData {
+                user: None,
+                csrf_token: &csrf.token,
+            },
             captcha_site_key: Some(&captcha.site_key),
             form_context: Some(&Context::default()),
-            ..Default::default()
         },
     ))
 }
@@ -173,10 +175,12 @@ async fn register_post<'a>(
         Template::render(
             "register",
             DefaultContext {
-                csrf_token: Some(csrf.new_token()),
+                base: BaseData {
+                    user: None,
+                    csrf_token: csrf.new_token(),
+                },
                 captcha_site_key: Some(&captcha.site_key),
                 form_context: Some(&form.context),
-                ..Default::default()
             },
         ),
     ))
@@ -197,9 +201,12 @@ async fn login_get(user_session: UserSession, csrf: CsrfToken) -> Result<Templat
     Ok(Template::render(
         "login",
         DefaultContext {
-            csrf_token: Some(&csrf.token),
+            base: BaseData {
+                user: None,
+                csrf_token: &csrf.token,
+            },
+            captcha_site_key: None,
             form_context: Some(&Context::default()),
-            ..Default::default()
         },
     ))
 }
@@ -261,10 +268,33 @@ async fn login_post<'a>(
         Template::render(
             "login",
             DefaultContext {
-                csrf_token: Some(&csrf.new_token()),
+                base: BaseData {
+                    user: None,
+                    csrf_token: csrf.new_token(),
+                },
                 form_context: Some(&form.context),
-                ..Default::default()
+                captcha_site_key: None,
             },
         ),
     ))
+}
+
+#[post("/logout")]
+async fn logout(
+    _csrf: CsrfVerify,
+    user_session: UserSession,
+    conn: FumohouseDb,
+    cookies: &CookieJar<'_>,
+) -> Result<Redirect, Status> {
+    if let Some(session) = user_session.session {
+        if let Err(err) = SessionUtils::end_session(&conn, cookies, &session).await {
+            error!("logout: failed to end user session: {}", err);
+            return Err(Status::InternalServerError);
+        }
+
+        info!("logout: {} logged out", user_session.user.unwrap().username);
+    }
+
+
+    Ok(Redirect::to(uri!("/auth/login")))
 }

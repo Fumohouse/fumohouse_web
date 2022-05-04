@@ -24,7 +24,7 @@
 {% endmacro field_errors %}
 
 {% macro form(url) %}
-    <form action="{{ url ~ '?csrf_token=' ~ csrf_token }}" method="post" enctype="multipart/form-data">
+    <form action="{{ url ~ '?csrf_token=' ~ base.csrf_token }}" method="post" enctype="multipart/form-data">
         {{ self::form_errors() }}
 {% endmacro form %}
 

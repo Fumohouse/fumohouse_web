@@ -81,6 +81,23 @@
     background-color: var(--nav-bg);
 }
 
+.nav__logout-button {
+    width: 100%;
+    background: none;
+    color: inherit;
+    border: none;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    outline: none;
+}
+
+@media (hover) {
+    .nav__logout-button:hover {
+        color: var(--link-hover);
+    }
+}
+
 @media screen and (min-width: 900px) {
     /* subnav: desktop */
 
@@ -176,7 +193,8 @@
     }
 
     .nav__link {
-        padding: 0.5em 0.5em;
+        --navlink-padding: 0.5em;
+        padding: var(--navlink-padding);
     }
 
     .nav__button .nav__link {
@@ -213,8 +231,9 @@
     }
 
     .nav__subnav {
+        --subnav-indent: 3ch;
         display: none;
-        text-indent: 3ch;
+        text-indent: var(--subnav-indent);
     }
 
     .nav__link-checkbox:checked~.nav__subnav {
@@ -223,5 +242,13 @@
 
     .nav__link-checkbox:checked~.nav__link .nav__link-expand {
         transform: rotateZ(90deg);
+    }
+
+    .nav__logout {
+        text-indent: 0;
+    }
+
+    .nav__logout-button {
+        padding-left: calc(var(--navlink-padding) + var(--subnav-indent));
     }
 }
