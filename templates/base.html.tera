@@ -28,6 +28,9 @@
     {% include "includes/nav" %}
     <div class="content">{% block content %}{% endblock content %}</div>
     {% include "includes/footer" %}
+
+    {# https://stackoverflow.com/a/25488622 #}
+    <script> </script>
 </body>
 
 </html>
