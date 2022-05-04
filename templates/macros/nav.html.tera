@@ -1,3 +1,10 @@
+{#
+    TODO This file uses what most likely should be a bug
+    to use the `nav` namespace instead of `self`, which appears to be error prone.
+    https://github.com/Keats/tera/issues/562 & similar issues.
+    Relevant namespace declarations are in templates such as `base.html.tera`.
+#}
+
 {% macro begin(id, label, href="#", subnav="none") %}
     {% set css_id = "page-" ~ id %}
     {% set has_subnav = subnav != "none" %}
@@ -28,3 +35,8 @@
     {% endif %}
     </div>
 {% endmacro end %}
+
+{% macro link(id, label, href="#") %}
+    {{ nav::begin(id=id, label=label, href=href) }}
+    {{ nav::end() }}
+{% endmacro link %}

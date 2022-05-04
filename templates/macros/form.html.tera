@@ -1,3 +1,10 @@
+{#
+    TODO This file uses what most likely should be a bug
+    to use the `form` namespace instead of `self`, which appears to be error prone.
+    https://github.com/Keats/tera/issues/562 & similar issues.
+    Relevant namespace declarations are in templates such as `base.html.tera`.
+#}
+
 {% macro value_for(name) %}
     {%- if name in form_context.values -%}
         {{- form_context.values | get(key=name) | first -}}
@@ -25,7 +32,7 @@
 
 {% macro form(url) %}
     <form action="{{ url ~ '?csrf_token=' ~ base.csrf_token }}" method="post" enctype="multipart/form-data">
-        {{ self::form_errors() }}
+        {{ form::form_errors() }}
 {% endmacro form %}
 
 {% macro input(type, label, name, value="", required=false) %}
@@ -35,7 +42,7 @@
             name="{{ name }}"
             id="{{ name }}"
             {% if type != "password" %}
-            value="{{ self::value_for(name=name) }}"
+            value="{{ form::value_for(name=name) }}"
             {% endif %}
             placeholder="{{ label }}"
             {% if required %}
@@ -43,7 +50,7 @@
             {% endif %}
         >
 
-        {{ self::field_errors(name=name) }}
+        {{ form::field_errors(name=name) }}
     </div>
 {% endmacro input %}
 

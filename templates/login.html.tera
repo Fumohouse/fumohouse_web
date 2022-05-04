@@ -1,5 +1,4 @@
 {% extends "base" %}
-{% import "macros/form" as form %}
 
 {% block title %}Login{% endblock title %}
 

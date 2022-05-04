@@ -18,9 +18,9 @@
             <a href="#" class="nav__link">Lorem ipsum dolor sit amet.</a>
         {{ nav::end(subnav=true) }}
 
-        {{ nav_util::link(id="changelog", label="Changelog" )}}
-        {{ nav_util::link(id="download", label="Download" )}}
-        {{ nav_util::link(id="about", label="About" )}}
+        {{ nav::link(id="changelog", label="Changelog" )}}
+        {{ nav::link(id="download", label="Download" )}}
+        {{ nav::link(id="about", label="About" )}}
 
         {% if base.user %}
         {{ nav::begin(id="account", label=base.user.username, href="#", subnav="right") }}
@@ -29,7 +29,7 @@
             </form>
         {{ nav::end(subnav=true) }}
         {% else %}
-        {{ nav_util::link(id="login", label="Login / Sign Up", href="/auth/login") }}
+        {{ nav::link(id="login", label="Login / Sign Up", href="/auth/login") }}
         {% endif %}
     </nav>
 </header>
