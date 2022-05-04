@@ -1,0 +1,30 @@
+{% macro begin(id, label, href="#", subnav="none") %}
+    {% set css_id = "page-" ~ id %}
+    {% set has_subnav = subnav != "none" %}
+
+    <div class="nav__button">
+        {% if has_subnav %}
+        <input id="{{ css_id }}" type="checkbox" class="nav__link-checkbox">
+        {% endif %}
+
+        <a class="nav__link" href="{{ href }}">
+            <label
+                for="{{ css_id }}"
+                class="nav__link-expand {% if subnav == 'none' %}nav__link-expand--disabled{% endif %}"
+            >
+                <i class="fa-solid fa-chevron-right"></i>
+            </label>
+            {{ label }}
+        </a>
+
+        {% if has_subnav %}
+        <div class="nav__subnav nav__subnav--{{ subnav }}">
+        {% endif %}
+{% endmacro begin %}
+
+{% macro end(subnav=false) %}
+    {% if subnav %}
+    </div>
+    {% endif %}
+    </div>
+{% endmacro end %}

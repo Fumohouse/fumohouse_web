@@ -1,3 +1,7 @@
+{# For nav partial #}
+{% import "macros/nav" as nav %}
+{% import "macros/nav_util" as nav_util %}
+
 <!DOCTYPE html>
 <html lang="en">
 

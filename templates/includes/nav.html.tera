@@ -12,14 +12,22 @@
     </label>
 
     <nav class="nav">
-        <a class="nav__link" href="/">Home</a>
-        <a class="nav__link" href="#">Changelog</a>
-        <a class="nav__link" href="#">Download</a>
-        <a class="nav__link" href="#">About</a>
+        {{ nav::begin(id="home", label="Home", href="/", subnav="left") }}
+            <a href="#" class="nav__link">Test 1</a>
+            <a href="#" class="nav__link">Test 2</a>
+            <a href="#" class="nav__link">Lorem ipsum dolor sit amet.</a>
+        {{ nav::end(subnav=true) }}
+
+        {{ nav_util::link(id="changelog", label="Changelog" )}}
+        {{ nav_util::link(id="download", label="Download" )}}
+        {{ nav_util::link(id="about", label="About" )}}
+
         {% if user %}
-        <a href="#" class="nav__link">{{ user.username }}</a>
+        {{ nav::begin(id="account", label=user.username, href="#", subnav="right") }}
+            <a href="#" class="nav__link">Logout</a>
+        {{ nav::end(subnav=true) }}
         {% else %}
-        <a class="nav__link" href="/auth/login">Login / Sign Up</a>
+        {{ nav_util::link(id="login", label="Login / Sign Up", href="/auth/login") }}
         {% endif %}
     </nav>
 </header>

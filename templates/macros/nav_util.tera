@@ -1,0 +1,11 @@
+{#
+    Exists to bypass errors with self::
+    It's better than referencing nav:: inside itself magically,
+    which is possible for some reason.
+#}
+{% import "macros/nav" as nav %}
+
+{% macro link(id, label, href="#") %}
+    {{ nav::begin(id=id, label=label, href=href) }}
+    {{ nav::end() }}
+{% endmacro link %}
