@@ -34,7 +34,7 @@ fn valid_char(c: char) -> bool {
 
 #[derive(FromForm)]
 struct RegisterForm<'a> {
-    #[field(validate = len(1..))]
+    #[field(validate = len(1..=32))]
     #[field(validate = with(|u| u.chars().all(valid_char), SiteMessages::UsernameInvalid.description()))]
     username: &'a str,
     #[field(validate = len(8..))]
