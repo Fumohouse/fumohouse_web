@@ -54,7 +54,7 @@ fn register_get(
     }
 
     Ok(Template::render(
-        "register",
+        "auth/register",
         DefaultContext {
             base: BaseData {
                 user: None,
@@ -173,7 +173,7 @@ async fn register_post<'a>(
     Err((
         form.context.status(),
         Template::render(
-            "register",
+            "auth/register",
             DefaultContext {
                 base: BaseData {
                     user: None,
@@ -199,7 +199,7 @@ async fn login_get(user_session: UserSession, csrf: CsrfToken) -> Result<Templat
     }
 
     Ok(Template::render(
-        "login",
+        "auth/login",
         DefaultContext {
             base: BaseData {
                 user: None,
@@ -266,7 +266,7 @@ async fn login_post<'a>(
     Err((
         form.context.status(),
         Template::render(
-            "login",
+            "auth/login",
             DefaultContext {
                 base: BaseData {
                     user: None,
