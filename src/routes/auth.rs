@@ -1,21 +1,20 @@
 use super::{BaseData, DefaultContext};
-use crate::db::{
-    models::{NewUser, User},
-    FumohouseDb,
+use crate::{
+    db::{
+        models::{NewUser, User},
+        FumohouseDb,
+    },
+    util::{self, CaptchaVerifier, CsrfToken, CsrfVerify, SessionUtils, SiteMessages, UserSession},
 };
-use crate::util::{
-    CaptchaVerifier, CsrfToken, CsrfVerify, SessionUtils, SiteMessages, UserSession,
-};
-use argon2::{
-    password_hash::{rand_core::OsRng, SaltString},
-    Argon2, PasswordHasher,
-};
+use argon2::Argon2;
 use diesel::{prelude::*, result::Error as DieselError};
 use rocket::form::{Context, Contextual, Error, Form};
 use rocket::http::{CookieJar, Status};
 use rocket::response::Redirect;
 use rocket::{Route, State};
 use rocket_dyn_templates::Template;
+
+pub const PASSWORD_MIN_LENGTH: usize = 8;
 
 pub fn routes() -> Vec<Route> {
     routes![register_get, register_post, login_get, login_post, logout]
@@ -37,7 +36,7 @@ struct RegisterForm<'a> {
     #[field(validate = len(1..=32))]
     #[field(validate = with(|u| u.chars().all(valid_char), SiteMessages::UsernameInvalid.description()))]
     username: &'a str,
-    #[field(validate = len(8..))]
+    #[field(validate = len(PASSWORD_MIN_LENGTH..))]
     password: &'a str,
     #[field(name = "h-captcha-response")]
     captcha_response: &'a str,
@@ -93,13 +92,10 @@ async fn handle_register<'a>(
     }
 
     let requested_username = form_data.username.to_string();
-    let salt = SaltString::generate(&mut OsRng);
-    let hashed_pass = argon.hash_password(form_data.password.as_bytes(), &salt);
+    let hash_result= util::hash_password(&argon, &form_data.password);
 
-    match hashed_pass {
+    match hash_result {
         Ok(hash) => {
-            let hash = hash.to_string();
-
             let new_user = conn
                 .run(move |c| {
                     let new_user = NewUser {
@@ -216,17 +212,10 @@ async fn handle_login<'a>(
     argon: &Argon2<'_>,
     form_data: &LoginForm<'a>,
 ) -> Option<User> {
-    use argon2::{password_hash::PasswordHash, PasswordVerifier};
-
     let username = form_data.username.to_string();
     let user = conn.run(move |c| User::find(c, &username)).await.ok()?;
 
-    let db_hash = PasswordHash::new(&user.password).ok()?;
-
-    if argon
-        .verify_password(form_data.password.as_bytes(), &db_hash)
-        .is_ok()
-    {
+    if user.verify_password(&argon, form_data.password).is_ok() {
         info!("login: new login: {}", user.username);
         return Some(user);
     }
@@ -294,7 +283,6 @@ async fn logout(
 
         info!("logout: {} logged out", user_session.user.unwrap().username);
     }
-
 
     Ok(Redirect::to(uri!("/auth/login")))
 }

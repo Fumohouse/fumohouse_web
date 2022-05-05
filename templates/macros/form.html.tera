@@ -41,7 +41,7 @@
         <input type="{{ type }}"
             name="{{ name }}"
             id="{{ name }}"
-            {% if type != "password" %}
+            {% if type != "password" and form_context.errors | length > 0 or form_context.form_errors | length > 0 %}
             value="{{ form::value_for(name=name) }}"
             {% endif %}
             placeholder="{{ label }}"

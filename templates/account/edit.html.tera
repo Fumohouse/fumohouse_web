@@ -1,0 +1,26 @@
+{% extends "base" %}
+
+{% block title %}Edit Account{% endblock title %}
+
+{% block content %}
+    <h2>Edit account</h2>
+    <fieldset>
+        <legend>Change Password</legend>
+        {{ form::form(url="/account/edit") }}
+            <div class="form__fields">
+                <input type="text" name="target" value="password" hidden>
+                {{ form::input(type="password", label="Current Password", name="current_password", required=true) }}
+                {{ form::input(type="password", label="New Password", name="new_password", required=true) }}
+                {{ form::input(type="password", label="Verify Password", name="verify_password", required=true) }}
+                <div class="info">
+                    <div class="info__title">Heads up!</div>
+                    For safety reasons, <b>changing your password will invalidate all of your current login sessions</b>,
+                    both in browsers and ingame.
+                    <br>
+                    Once your password changes, you will be redirected to the login page.
+                </div>
+                <input type="submit" value="Change Password">
+            </div>
+        {{ form::endform() }}
+    </fieldset>
+{% endblock content %}

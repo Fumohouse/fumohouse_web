@@ -7,6 +7,8 @@ pub enum SiteMessages {
     UsernameInUse,
     UsernameInvalid,
     LoginFailed,
+    PasswordIncorrect,
+    PasswordsDontMatch,
 }
 
 impl SiteMessages {
@@ -17,12 +19,16 @@ impl SiteMessages {
             Self::UsernameInvalid => "Username contains invalid characters.",
             Self::UsernameInUse => "Username is in use.",
             Self::LoginFailed => "Invalid username/password.",
+            Self::PasswordIncorrect => "Password is incorrect.",
+            Self::PasswordsDontMatch => "Passwords don't match.",
         }
     }
 
     pub fn field_name(&self) -> Option<&'static str> {
         match self {
             Self::UsernameInUse => Some("username"),
+            Self::PasswordIncorrect => Some("current_password"),
+            Self::PasswordsDontMatch => Some("verify_password"),
             _ => None,
         }
     }

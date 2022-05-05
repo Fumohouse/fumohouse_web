@@ -1,6 +1,7 @@
 use crate::db::models::User;
 use rocket::{form::Context, serde::Serialize};
 
+pub mod account;
 pub mod auth;
 pub mod pages;
 

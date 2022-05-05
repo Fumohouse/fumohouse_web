@@ -56,5 +56,6 @@ fn rocket() -> _ {
         .manage(Argon2::default())
         .mount("/", FileServer::from("static/"))
         .mount("/", routes::pages::routes())
+        .mount("/account", routes::account::routes())
         .mount("/auth", routes::auth::routes())
 }

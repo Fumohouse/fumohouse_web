@@ -87,7 +87,7 @@
     color: inherit;
     border: none;
     font-family: inherit;
-    text-align: left;
+    text-align: inherit;
     cursor: pointer;
     outline: none;
 }

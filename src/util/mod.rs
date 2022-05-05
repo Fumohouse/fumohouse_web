@@ -1,9 +1,10 @@
+use argon2::{password_hash::{Error as ArgonError, SaltString}, Argon2, PasswordHasher};
 use fern::{
     colors::{Color, ColoredLevelConfig},
     Dispatch, InitError,
 };
 use log::LevelFilter;
-use rand::{distributions::Alphanumeric, Rng};
+use rand::{distributions::Alphanumeric, Rng, rngs::OsRng};
 use sha2::{Digest, Sha256};
 
 mod captcha;
@@ -47,6 +48,13 @@ pub fn setup_logging(debug: bool) -> Result<(), InitError> {
         .apply()?;
 
     Ok(())
+}
+
+pub fn hash_password(argon: &Argon2, password: &str) -> Result<String, ArgonError> {
+    let salt = SaltString::generate(&mut OsRng);
+    let hashed_pass = argon.hash_password(password.as_bytes(), &salt)?;
+
+    Ok(hashed_pass.to_string())
 }
 
 fn rand_string(length: usize) -> String {

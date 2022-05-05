@@ -1,4 +1,5 @@
 use crate::db::{lower, schema::users};
+use argon2::{Argon2, PasswordHash, password_hash::Error as ArgonError, PasswordVerifier};
 use chrono::{DateTime, Utc};
 use diesel::{prelude::*, result::Error, PgConnection};
 use rocket::serde::Serialize;
@@ -18,6 +19,12 @@ impl User {
         users
             .filter(lower(username_column).eq(lower(username)))
             .first(c)
+    }
+
+    pub fn verify_password(&self, argon: &Argon2, password: &str) -> Result<(), ArgonError> {
+        let db_hash = PasswordHash::new(&self.password)?;
+
+        argon.verify_password(password.as_bytes(), &db_hash)
     }
 }
 

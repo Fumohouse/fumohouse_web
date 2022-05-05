@@ -24,6 +24,7 @@
 
         {% if base.user %}
         {{ nav::begin(id="account", label=base.user.username, href="#", subnav="right") }}
+            <a href="/account/edit" class="nav__link">Account Settings</a>
             <form class="nav__logout" action="/auth/logout?csrf_token={{ base.csrf_token }}" method="post">
                 <button class="nav__link nav__logout-button" type="submit">Logout</button>
             </form>
