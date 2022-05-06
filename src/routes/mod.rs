@@ -17,13 +17,3 @@ pub struct DefaultContext<'a, 'b> {
     captcha_site_key: Option<&'a str>,
     form_context: Option<&'a Context<'b>>,
 }
-
-impl DefaultContext<'_, '_> {
-    pub fn base_only<'a, 'b>(base: BaseData<'a>) -> DefaultContext<'a, 'b> {
-        DefaultContext {
-            base,
-            captcha_site_key: None,
-            form_context: None,
-        }
-    }
-}

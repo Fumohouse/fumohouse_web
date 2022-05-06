@@ -20,7 +20,9 @@
 
         {{ nav::link(id="changelog", label="Changelog" )}}
         {{ nav::link(id="download", label="Download" )}}
-        {{ nav::link(id="about", label="About" )}}
+        {{ nav::begin(id="about", label="About", subnav="right") }}
+            <a href="/policy" class="nav__link">Policy</a>
+        {{ nav::end(subnav=true) }}
 
         {% if base.user %}
         {{ nav::begin(id="account", label=base.user.username, href="#", subnav="right") }}

@@ -1,0 +1,18 @@
+{% extends "base" %}
+
+{% block vars %}
+{% set category = front_matter.category %}
+{% set page = front_matter.page %}
+{% endblock vars %}
+
+{% block title %}{{ front_matter.title }}{% endblock title %}
+
+{% block ext %}
+<link rel="stylesheet" href="/css/markdown.css">
+{% endblock ext%}
+
+{% block content %}
+<div class="markdown">
+    {{ html | safe }}
+</div>
+{% endblock content %}

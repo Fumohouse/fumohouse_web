@@ -3,8 +3,8 @@
 {% import "macros/form" as form %}
 
 {% block vars %}
-    {% set category = "category" %}
-    {% set page = "" %}
+{% set category = "category" %}
+{% set page = "" %}
 {% endblock vars %}
 
 <!DOCTYPE html>
@@ -27,6 +27,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/fontawesome.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/brands.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/solid.min.css">
+
+    {% block ext %}
+    {% endblock ext %}
 </head>
 
 <body>
@@ -35,7 +38,7 @@
     <div class="body">
         <div class="body__title">
             <div class="body__title-text">
-                {% if page | length > 0 %}
+                {% if page and page | length > 0 %}
                 <strong>{{ category }} /</strong> {{ page }}
                 {% else %}
                 <strong>{{ category }}</strong>

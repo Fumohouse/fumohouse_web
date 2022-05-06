@@ -1,14 +1,18 @@
-use argon2::{password_hash::{Error as ArgonError, SaltString}, Argon2, PasswordHasher};
+use argon2::{
+    password_hash::{Error as ArgonError, SaltString},
+    Argon2, PasswordHasher,
+};
 use fern::{
     colors::{Color, ColoredLevelConfig},
     Dispatch, InitError,
 };
 use log::LevelFilter;
-use rand::{distributions::Alphanumeric, Rng, rngs::OsRng};
+use rand::{distributions::Alphanumeric, rngs::OsRng, Rng};
 use sha2::{Digest, Sha256};
 
 mod captcha;
 mod csrf;
+pub mod markdown;
 mod messages;
 mod session;
 

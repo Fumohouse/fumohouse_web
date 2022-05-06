@@ -1,16 +1,16 @@
-use super::{BaseData, DefaultContext};
-use crate::util::{CsrfToken, UserSession};
+use crate::util::markdown::markdown_route;
 use rocket::Route;
-use rocket_dyn_templates::Template;
 
 pub fn routes() -> Vec<Route> {
-    routes![index]
+    routes![index, policy, code, contributor_agreement]
 }
 
-#[get("/")]
-fn index(csrf: CsrfToken, user_session: UserSession) -> Template {
-    Template::render("index", DefaultContext::base_only(BaseData {
-        user: user_session.user,
-        csrf_token: &csrf.token,
-    }))
-}
+markdown_route!(index, "/", "home.md");
+
+markdown_route!(policy, "/policy", "policy/policy.md");
+markdown_route!(code, "/policy/code", "policy/code_of_conduct.md");
+markdown_route!(
+    contributor_agreement,
+    "/policy/contributors",
+    "policy/contributor_agreement.md"
+);
