@@ -183,7 +183,8 @@
         right: 0;
 
         opacity: 0;
-        transition: opacity 0.25s ease-in-out;
+        visibility: hidden;
+        transition: all 0.25s ease-in-out;
 
         overflow: hidden;
     }
@@ -213,6 +214,7 @@
 
     #nav__expand:checked~.nav {
         opacity: 1;
+        visibility: visible;
     }
 
     /* subnav */
