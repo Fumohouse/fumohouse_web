@@ -128,7 +128,7 @@
         top: calc(100% + var(--subnav-gap));
         width: auto;
 
-        box-shadow: 0.1em 0.1em 0.2em black;
+        box-shadow: 0 0 0.2em black;
     }
 
     .nav__subnav--left {
