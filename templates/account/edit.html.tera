@@ -1,9 +1,13 @@
 {% extends "base" %}
 
+{% block vars %}
+    {% set category = "account" %}
+    {% set page = "edit" %}
+{% endblock vars %}
+
 {% block title %}Edit Account{% endblock title %}
 
 {% block content %}
-    <h2>Edit account</h2>
     <fieldset>
         <legend>Change Password</legend>
         {{ form::form(url="/account/edit") }}

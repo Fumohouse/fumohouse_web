@@ -70,14 +70,15 @@ body {
 
 /* content */
 
-.content {
+.body {
+    position: relative;
+
     flex-grow: 1;
 
     border-radius: var(--border-radius);
     margin: 0 auto;
     margin-top: 3em;
     margin-bottom: 1em;
-    padding: 0.5em 1em;
 
     min-width: 65ch;
     max-width: 65ch;
@@ -85,8 +86,44 @@ body {
     background-color: rgb(25, 25, 25);
 }
 
+.body__title {
+    background-color: rgb(0, 39, 78);
+    border-radius: var(--border-radius);
+    padding: 0.5em 1em;
+    font-size: 1.2rem;
+}
+
+.body__title-text {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.body::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    transform: translateY(50%) rotateX(180deg);
+    left: 0;
+    width: 15%;
+    height: 0.2em;
+
+    background-image: linear-gradient(45deg,
+    #00ffff 0,
+    #0038ff 20px,
+    #ff00d6 40px,
+    #ff0000 50px,
+    #ff8a00 60px,
+    #faff00 70px,
+    #00ff19 80px);
+}
+
+.body__content {
+    padding: 1em;
+}
+
 @media screen and (max-width: 100ch) {
-    .content {
+    .body {
         min-width: 0;
         margin: 1em 2em;
     }

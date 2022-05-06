@@ -2,6 +2,11 @@
 {% import "macros/nav" as nav %}
 {% import "macros/form" as form %}
 
+{% block vars %}
+    {% set category = "category" %}
+    {% set page = "" %}
+{% endblock vars %}
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -26,7 +31,20 @@
 
 <body>
     {% include "includes/nav" %}
-    <div class="content">{% block content %}{% endblock content %}</div>
+
+    <div class="body">
+        <div class="body__title">
+            <div class="body__title-text">
+                {% if page | length > 0 %}
+                <strong>{{ category }} /</strong> {{ page }}
+                {% else %}
+                <strong>{{ category }}</strong>
+                {% endif %}
+            </div>
+        </div>
+        <div class="body__content">{% block content %}{% endblock content %}</div>
+    </div>
+
     {% include "includes/footer" %}
 
     {# https://stackoverflow.com/a/25488622 #}

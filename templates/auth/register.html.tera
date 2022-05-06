@@ -1,9 +1,13 @@
 {% extends "base" %}
 
+{% block vars %}
+    {% set category = "auth" %}
+    {% set page = "register" %}
+{% endblock vars %}
+
 {% block title %}Register{% endblock title %}
 
 {% block content %}
-<h2>Register an account</h2>
 <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
 
 {{ form::form(url="/auth/register") }}

@@ -1,10 +1,13 @@
 {% extends "base" %}
 
+{% block vars %}
+    {% set category = "auth" %}
+    {% set page = "login" %}
+{% endblock vars %}
+
 {% block title %}Login{% endblock title %}
 
 {% block content %}
-<h2>Login</h2>
-
 {{ form::form(url="/auth/login") }}
     <div class="form__fields">
         {{ form::input(type="text", label="Username", name="username", required=true) }}

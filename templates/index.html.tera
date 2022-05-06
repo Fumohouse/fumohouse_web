@@ -1,5 +1,10 @@
 {% extends "base" %}
 
+{% block vars %}
+    {% set category = "home" %}
+    {% set page = "" %}
+{% endblock vars%}
+
 {% block title %}Home{% endblock title %}
 
 {% block content %}
