@@ -14,7 +14,7 @@
                 {{ form::input(type="password", label="Verify Password", name="verify_password", required=true) }}
                 <div class="info">
                     <div class="info__title">Heads up!</div>
-                    For safety reasons, <b>changing your password will invalidate all of your current login sessions</b>,
+                    For safety reasons, <strong>changing your password will invalidate all of your current login sessions</strong>,
                     both in browsers and ingame.
                     <br>
                     Once your password changes, you will be redirected to the login page.
