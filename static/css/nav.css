@@ -1,15 +1,3 @@
-.header::before {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-
-    z-index: -1000;
-    height: 15%;
-    content: "";
-    background: linear-gradient(to bottom, rgb(20, 20, 20) 0%, rgb(20, 20, 20) 20%, transparent 100%);
-}
-
 .header {
     display: flex;
     align-items: center;
@@ -20,17 +8,6 @@
 
 .header__spacer {
     flex-grow: 1;
-}
-
-.nav {
-    display: inline-block;
-    background-color: var(--nav-bg);
-    border-top-left-radius: var(--border-radius);
-    border-bottom-left-radius: var(--border-radius);
-
-    white-space: nowrap;
-
-    padding-right: var(--horiz-padding);
 }
 
 .nav__button {
@@ -99,7 +76,32 @@
 }
 
 @media screen and (min-width: 900px) {
-    /* subnav: desktop */
+    /* header, nav */
+
+    .header::before {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+
+        z-index: -1000;
+        height: 15%;
+        content: "";
+        background: linear-gradient(to bottom, rgb(20, 20, 20) 0%, rgb(20, 20, 20) 20%, transparent 100%);
+    }
+
+    .nav {
+        display: inline-block;
+        background-color: var(--nav-bg);
+        border-top-left-radius: var(--border-radius);
+        border-bottom-left-radius: var(--border-radius);
+
+        white-space: nowrap;
+
+        padding-right: var(--horiz-padding);
+    }
+
+    /* subnav */
 
     .nav__subnav::before {
         content: "";
@@ -163,10 +165,6 @@
 @media screen and (max-width: 900px) {
     /* header, nav */
 
-    .header::before {
-        display: none;
-    }
-
     .header {
         position: relative;
 
@@ -175,8 +173,6 @@
     }
 
     .nav {
-        all: unset;
-
         background-color: var(--nav-bg);
         display: flex;
         flex-direction: column;
