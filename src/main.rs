@@ -6,11 +6,6 @@ extern crate diesel;
 extern crate log;
 #[macro_use]
 extern crate quick_error;
-extern crate comrak;
-extern crate fern;
-extern crate rand;
-extern crate serde;
-extern crate serde_yaml;
 
 use argon2::Argon2;
 use rocket::figment::{
