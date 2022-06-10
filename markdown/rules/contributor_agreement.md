@@ -1,17 +1,15 @@
 ---
-category: "policy"
+category: "rules"
 page: "contributor agreement"
 title: "Contributor Agreement"
 ---
 
-*Last modified: 5 May, 2022*
+*Last modified: 10 June, 2022*
 
 This page lays out a few guidelines about your contributions to Fumohouse -
 options which you have, and things which have been decided for you.
-You should read and understand the contents of this page which apply to you,
-and ask questions if you need to.
 
-If you do not agree with any part of this page, you should contact me about it.
+If you do not agree with or do not understand any part of this page, you should contact me about it.
 In the meantime, you should not submit your contribution.
 
 ## For all contributions
@@ -34,10 +32,11 @@ Failure to do so can result in removal of your contribution, or suspension of yo
     - Understand that this license is irrevocable.
 2. You may request an alternate license, but doing so could cause your contribution to be delayed or rejected.
 3. Whenever possible, you should submit project files instead of exported assets, unless you use a paid program to work (in this case, submit both).
-4. If you have a Github account, you should send your commit email or no-reply email for use in a co-author message.
+4. If you have a GitHub account, you should send your commit email or no-reply email for use in a co-author message.
 
 ## For code
 
-1. You must license your code under MIT.
-2. You should stick to the quality standards set out by the rest of the codebase. If you do not follow appropriate conventions, your contribution will be rejected.
+1. You must license your code under the Rust community standard license, which is `MIT OR Apache-2.0`.
+Details about licensing can be found on each Fumohouse GitHub repository.
+2. You should stick to the quality standards set out by the rest of the codebase.
 3. You should submit your contribution via Pull Request.

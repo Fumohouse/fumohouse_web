@@ -21,7 +21,7 @@
         {{ nav::link(id="changelog", label="Changelog" )}}
         {{ nav::link(id="download", label="Download" )}}
         {{ nav::begin(id="about", label="About", subnav="right") }}
-            <a href="/policy" class="nav__link">Policy</a>
+            <a href="/rules" class="nav__link">Rules</a>
         {{ nav::end(subnav=true) }}
 
         {% if base.user %}

@@ -1,10 +1,10 @@
 ---
-category: "policy"
+category: "rules"
 page: "code of conduct"
 title: "Code of Conduct"
 ---
 
-*Last modified: 5 May, 2022*
+*Last modified: 10 June, 2022*
 
 ## Community Standards
 
@@ -26,23 +26,19 @@ The following behavior is considered unacceptable:
 
 ### Scope
 
-The code of conduct applies to all members of Fumohouse, and in all situations where a member is representing or contributing to Fumohouse.
-It may apply in rare cases to a member's private conduct or their public or off-platform behavior.
+The code of conduct applies to all of your interactions with Fumohouse, its community, and its members.
+It may be applied to private or off-platform conduct in extreme circumstances.
 
 ### Violations
 
 Violations of this code of conduct can be reported privately via Discord or via e-mail to `fumohouse [at] pm.me`.
-Your report may be discussed with trusted community members and the accused (to whatever level of detail comfortable). If there are reasonable doubts about your claims, a decision may take longer than expected, and punishment may be impossible.
+Your report may be discussed with trusted community members and the accused (to whatever level of detail comfortable).
 
 ### Enforcement
 
 Enforcement will be decided on a per-case basis.
 
-Context and precedent will be considered, but previous precedent may be overridden if necessary (in this case, enforcement will be less harsh).
-
 ### Changes
 
-Changes to this code can be made at any time, as indicated by the modify date of this page.
-
-Added policies will not be applied retroactively.
-Removal of policies will.
+Changes to this page can be made at any time, as indicated by the modify date.
+Added policies will not be applied retroactively, whereas removal of policies will.
