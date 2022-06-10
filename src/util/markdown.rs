@@ -3,6 +3,7 @@ use comrak::{nodes::NodeValue, Arena, ComrakExtensionOptions, ComrakOptions};
 use rocket_dyn_templates::Template;
 use serde::{Deserialize, Serialize};
 use std::{error::Error, fs, path::Path, str};
+use thiserror::Error;
 
 const FRONT_MATTER_SEP: &str = "---";
 
@@ -13,13 +14,10 @@ pub struct FrontMatter {
     pub title: String,
 }
 
-quick_error! {
-    #[derive(Debug)]
-    pub enum MarkdownError {
-        NoFrontMatter {
-            display("No front matter was found.")
-        }
-    }
+#[derive(Error, Debug)]
+pub enum MarkdownError {
+    #[error("No front matter was found.")]
+    NoFrontMatter,
 }
 
 #[derive(Serialize)]

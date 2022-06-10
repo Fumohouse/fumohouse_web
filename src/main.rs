@@ -4,8 +4,6 @@ extern crate rocket;
 extern crate diesel;
 #[macro_use]
 extern crate log;
-#[macro_use]
-extern crate quick_error;
 
 use argon2::Argon2;
 use rocket::figment::{

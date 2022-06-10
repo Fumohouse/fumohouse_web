@@ -4,20 +4,17 @@ use rocket::{
     request::{FromRequest, Outcome, Request},
 };
 use std::{option::Option, str};
+use thiserror::Error;
 
 pub const TOKEN_NAME: &str = "csrf_token";
 const TOKEN_LENGTH: usize = 64;
 
-quick_error! {
-    #[derive(Debug)]
-    pub enum CsrfError {
-        VerificationFailed {
-            display("CSRF verification failed.")
-        }
-        GenerationFailed {
-            display("Failed to generate CSRF token.")
-        }
-    }
+#[derive(Error, Debug)]
+pub enum CsrfError {
+    #[error("CSRF verification failed.")]
+    VerificationFailed,
+    #[error("Failed to generate CSRF token.")]
+    GenerationFailed,
 }
 
 pub struct CsrfToken {
@@ -85,10 +82,7 @@ impl<'a> FromRequest<'a> for CsrfVerify {
                         })
                     }
                     _ => {
-                        return Failure((
-                            Status::InternalServerError,
-                            CsrfError::GenerationFailed,
-                        ))
+                        return Failure((Status::InternalServerError, CsrfError::GenerationFailed))
                     }
                 }
             }
@@ -99,9 +93,6 @@ impl<'a> FromRequest<'a> for CsrfVerify {
             None => info!("csrf violation from unknown ip"),
         }
 
-        return Failure((
-            Status::Forbidden,
-            CsrfError::VerificationFailed,
-        ));
+        return Failure((Status::Forbidden, CsrfError::VerificationFailed));
     }
 }

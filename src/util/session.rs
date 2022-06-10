@@ -13,6 +13,7 @@ use rocket::{
     Rocket,
 };
 use std::error::Error;
+use thiserror::Error;
 
 const SESSION_COOKIE_NAME: &str = "fh_session";
 const SESSION_ID_LENGTH: usize = 32;
@@ -147,7 +148,8 @@ impl SessionUtils {
             diesel::delete(sessions)
                 .filter(id.eq(id_to_delete))
                 .execute(c)
-        }).await?;
+        })
+        .await?;
 
         cookies.remove_private(Cookie::named(SESSION_COOKIE_NAME));
 
@@ -155,22 +157,12 @@ impl SessionUtils {
     }
 }
 
-quick_error! {
-    #[derive(Debug)]
-    pub enum SessionError {
-        RetrieveFailed { diesel_error: DieselError } {
-            display("Failed to retrieve user session information: {}.", diesel_error)
-        }
-        RenewFailed { diesel_error: DieselError } {
-            display("Failed to renew user session: {}.", diesel_error)
-        }
-        SessionGuardFailed {
-            display("The UserSession guard failed.")
-        }
-        Forbidden {
-            display("The user is forbidden from accessing this route.")
-        }
-    }
+#[derive(Error, Debug)]
+pub enum SessionError {
+    #[error("Failed to retrieve user session information: {diesel_error}.")]
+    RetrieveFailed { diesel_error: DieselError },
+    #[error("Failed to renew user session: {diesel_error}.")]
+    RenewFailed { diesel_error: DieselError },
 }
 
 #[derive(Default)]
