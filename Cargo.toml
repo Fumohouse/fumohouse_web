@@ -5,9 +5,9 @@ edition = "2021"
 
 [dependencies]
 # Rocket
-rocket = { git = "https://github.com/SergioBenitez/Rocket", rev = "bf84b1c", features = ["secrets"] }
-rocket_dyn_templates = { git = "https://github.com/SergioBenitez/Rocket", rev = "bf84b1c", features = ["tera"] }
-rocket_sync_db_pools = { git = "https://github.com/SergioBenitez/Rocket", rev = "bf84b1c", features = ["diesel_postgres_pool"] }
+rocket = { version = "0.5.0-rc.2", features = ["secrets"] }
+rocket_dyn_templates = { version = "0.1.0-rc.2", features = ["tera"] }
+rocket_sync_db_pools = { version = "0.1.0-rc.2", features = ["diesel_postgres_pool"] }
 
 # Crypto
 argon2 = "0.4"
